@@ -1,4 +1,6 @@
-# 领域检索
+
+# 领域检索  <a href='https://gitee.com/ArretyWord/domain-repository'><img src='https://gitee.com/ArretyWord/domain-repository/widgets/widget_6.svg' alt='Fork me on Gitee'></img></a>
+
 
 ## 背景
 
@@ -183,3 +185,5 @@ public class GetOrderApi2 {
     }
 }
 ```
+
+[![分数指数幂/domain-repository](https://gitee.com/ArretyWord/domain-repository/widgets/widget_card.svg?colors=eae9d7,2e2f29,272822,484a45,eae9d7,747571)](https://gitee.com/ArretyWord/domain-repository)
