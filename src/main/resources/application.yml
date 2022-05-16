@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:99999/order?characterEncoding=utf-8
+    username: arrety
+    password: ftyguyij123
