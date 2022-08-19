@@ -38,7 +38,7 @@ public class DomainFieldCache {
         for (Field table : fields) {
             table.setAccessible(true);
             Class<?> tableType = ReflectionUtil.getGenericType(table);
-            List<Field> fieldChainTable = new ArrayList<>(fieldChain);
+            List<Field> fieldChainTable = new ArrayList<>();
             fieldChainTable.add(table);
             if (tableType.isAnnotationPresent(Dom.class)) {
                 Map<String, List<Field>> columnMap = new HashMap<>();

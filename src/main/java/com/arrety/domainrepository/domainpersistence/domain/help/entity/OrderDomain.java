@@ -5,12 +5,14 @@ import com.arrety.domainrepository.domainpersistence.domain.core.JoinOn;
 import com.arrety.domainrepository.domainpersistence.domain.core.RequestDomain;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 订单聚合
  */
 @Dom
 @Data
-public class Order extends RequestDomain<Order> {
+public class OrderDomain extends RequestDomain<OrderDomain> {
 
     /**
      * 主单实体
@@ -22,5 +24,5 @@ public class Order extends RequestDomain<Order> {
      * 子单聚合
      */
     @JoinOn(joinId = "slaveOrderInfo.masterOrderId")
-    public SlaveOrder slaveOrder;
+    public List<SlaveOrder> slaveOrder;
 }

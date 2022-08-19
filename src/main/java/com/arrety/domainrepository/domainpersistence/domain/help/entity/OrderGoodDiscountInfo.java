@@ -8,11 +8,11 @@ import lombok.Data;
  * @author arrety
  * @date 2022/5/14 13:45
  */
-@Dom
 @Data
-public class OrderGoodDiscountInfo extends RequestDomain<OrderGoodDiscountInfo> {
+public class OrderGoodDiscountInfo {
 
-    public long id;
-    public long orderGoodId;
+    public Integer id;
+    public Integer slaveOrderInfoId;
+    public Double discount;
 
 }

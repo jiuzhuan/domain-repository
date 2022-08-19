@@ -11,14 +11,4 @@ import lombok.Data;
 @Data
 public class OrderGood extends RequestDomain<OrderGood> {
 
-    /**
-     * 明细实体
-     */
-    public OrderGoodInfo orderGoodInfo;
-
-    /**
-     * 优惠分摊实体
-     */
-    public OrderGoodDiscountInfo orderGoodDisCountInfo;
-
 }

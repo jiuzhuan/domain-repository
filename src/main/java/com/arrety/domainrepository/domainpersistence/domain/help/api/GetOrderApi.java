@@ -1,7 +1,7 @@
 package com.arrety.domainrepository.domainpersistence.domain.help.api;
 
 import com.arrety.domainrepository.domainpersistence.domain.help.entity.MasterOrderInfo;
-import com.arrety.domainrepository.domainpersistence.domain.help.entity.Order;
+import com.arrety.domainrepository.domainpersistence.domain.help.entity.OrderDomain;
 import com.arrety.domainrepository.domainpersistence.domain.help.entity.SlaveOrderInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,17 +16,17 @@ import java.util.List;
 public class GetOrderApi {
 
     @Autowired
-    Order order;
+    OrderDomain orderDomain;
 
-    public List<Order> getOrder(List<Long> masterOrderIds){
+    public List<OrderDomain> getOrder(List<Long> masterOrderIds){
 
         //订单聚合初始查询-主单实体
-        order.selectAll().from(MasterOrderInfo.class).where().in(MasterOrderInfo::getId, masterOrderIds).selectList(Order.class);
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().in(MasterOrderInfo::getId, masterOrderIds).selectList(OrderDomain.class);
 
         //关联查询子单实体
-        order.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
 
         //返回聚合结果
-        return order.get();
+        return orderDomain.get();
     }
 }

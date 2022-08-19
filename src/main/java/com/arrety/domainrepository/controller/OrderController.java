@@ -1,14 +1,16 @@
 package com.arrety.domainrepository.controller;
 
 import com.arrety.domainrepository.domainpersistence.domain.help.entity.MasterOrderInfo;
-import com.arrety.domainrepository.domainpersistence.domain.help.entity.Order;
+import com.arrety.domainrepository.domainpersistence.domain.help.entity.OrderDomain;
 import com.arrety.domainrepository.domainpersistence.domain.help.entity.SlaveOrderInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author arrety
@@ -18,13 +20,19 @@ import java.util.List;
 public class OrderController {
 
     @Autowired
-    Order order;
+    OrderDomain orderDomain;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
 
     @GetMapping("getOrder")
-    public List<Order> getOrder(@RequestParam("orderId") Long orderId){
-        order.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId).selectList(Order.class);
-        order.getEntity(SlaveOrderInfo.class);
-        return order.get();
+    public List<OrderDomain> getOrder(@RequestParam("orderId") Integer orderId){
+
+        List<Map<String, Object>> maps = jdbcTemplate.queryForList("select * from master_order_info where id = ?", orderId);
+
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId).selectList(OrderDomain.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        return orderDomain.get();
     }
 }

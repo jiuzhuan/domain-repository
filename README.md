@@ -170,18 +170,18 @@ public class GetOrderApi2 {
         Map<Long, SlaveOrderInfo> slaveOrderInfoMap = slaveOrderInfos.stream().collect(Collectors.toMap(SlaveOrderInfo::getMasterOrderId, slaveOrderInfo -> slaveOrderInfo));
 
         //组装查询结果
-        List<Order> orders = new ArrayList<>();
+        List<Order> orderDomains = new ArrayList<>();
         for (MasterOrderInfo masterOrderInfo : masterOrderInfos) {
             Order order = new Order();
             order.setMasterOrderInfo(masterOrderInfo);
             SlaveOrder slaveOrder = new SlaveOrder();
             slaveOrder.setSlaveOrderInfo(slaveOrderInfoMap.get(masterOrderInfo.getId()));
             order.setSlaveOrder(slaveOrder);
-            orders.add(order);
+            orderDomains.add(order);
         }
 
         //返回聚合结果
-        return orders;
+        return orderDomains;
     }
 }
 ```

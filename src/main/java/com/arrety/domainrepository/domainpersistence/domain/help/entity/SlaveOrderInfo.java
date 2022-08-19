@@ -9,9 +9,10 @@ import lombok.Data;
  * @date 2022/5/14 13:45
  */
 @Data
-public class SlaveOrderInfo extends RequestDomain<SlaveOrderInfo> {
+public class SlaveOrderInfo {
 
-    public long id;
-    public long masterOrderId;
+    public Integer id;
+    public Integer masterOrderInfoId;
+    public String storeName;
 
 }

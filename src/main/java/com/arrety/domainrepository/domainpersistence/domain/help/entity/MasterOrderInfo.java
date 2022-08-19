@@ -11,5 +11,6 @@ import lombok.Data;
 @Data
 public class MasterOrderInfo extends RequestDomain<MasterOrderInfo> {
 
-    public Long id;
+    public Integer id;
+    public String userName;
 }
