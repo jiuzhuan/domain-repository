@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.example.api;
+package com.github.jiuzhuan.domain.repository.example.service;
 
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
 import com.github.jiuzhuan.domain.repository.example.entity.MasterOrderInfo;
@@ -14,7 +14,7 @@ import java.util.List;
  * @date 2022/5/12 22:56
  */
 @Service
-public class GetOrderApi {
+public class OrderService {
 
     @Autowired
     OrderDomain orderDomain;

@@ -1,7 +1,7 @@
 package com.github.jiuzhuan.domain.repository.example.domain;
 
-import com.github.jiuzhuan.domain.repository.domain.Dom;
-import com.github.jiuzhuan.domain.repository.domain.JoinOn;
+import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
+import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
 import com.github.jiuzhuan.domain.repository.example.entity.MasterOrderInfo;
 import lombok.Data;
 

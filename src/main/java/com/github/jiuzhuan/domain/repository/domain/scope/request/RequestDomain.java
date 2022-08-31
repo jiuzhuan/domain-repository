@@ -1,7 +1,8 @@
-package com.github.jiuzhuan.domain.repository.domain;
+package com.github.jiuzhuan.domain.repository.domain.scope.request;
 
 
 import com.github.jiuzhuan.domain.repository.builder.builder.SFunction;
+import com.github.jiuzhuan.domain.repository.domain.selecter.DomainSelect;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

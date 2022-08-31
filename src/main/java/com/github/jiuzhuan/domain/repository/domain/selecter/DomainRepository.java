@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.domain;
+package com.github.jiuzhuan.domain.repository.domain.selecter;
 
 import java.util.List;
 
