@@ -2,6 +2,9 @@ package com.arrety.domainrepository.domainpersistence.domain.core;
 
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,7 +18,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author arrety
  * @date 2022/4/24 18:26
  */
+@Component
 public class DomainFieldCache {
+
+    static ApplicationContext applicationContext;
+
+    @Autowired
+    public void setApplicationContext(ApplicationContext applicationContext){
+        DomainFieldCache.applicationContext = applicationContext;
+    }
 
     /**
      * 聚合实体中字段和表的映射缓存
@@ -38,7 +49,7 @@ public class DomainFieldCache {
         for (Field table : fields) {
             table.setAccessible(true);
             Class<?> tableType = ReflectionUtil.getGenericType(table);
-            List<Field> fieldChainTable = new ArrayList<>();
+            List<Field> fieldChainTable = new ArrayList<>(fieldChain);
             fieldChainTable.add(table);
             if (tableType.isAnnotationPresent(Dom.class)) {
                 Map<String, List<Field>> columnMap = new HashMap<>();
@@ -104,7 +115,7 @@ public class DomainFieldCache {
             if (dom != null) {
                 String joinId = declaredField.getAnnotation(JoinOn.class).joinId();
                 Class<?> joinClass = ReflectionUtil.getGenericType(tableType.getDeclaredField(joinId.split("\\.")[0]));
-                DomainSelect<?> itemDomain = new DomainSelect<>(tableType, joinClass);
+                DomainSelect<?> itemDomain = (DomainSelect)applicationContext.getBean(DomainSelect.class, tableType, joinClass);
                 itemDomainSelect.add(itemDomain);
                 Triple<Class, String, DomainSelect> selectDomainPair = Triple.of(tableType, joinId, itemDomain);
                 tableSelectDomainMap.put(declaredField.getName(), selectDomainPair);

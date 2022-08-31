@@ -6,6 +6,7 @@ import com.arrety.domainrepository.domainpersistence.common.LambdaColumnMap;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,19 +22,11 @@ public abstract class AbstractLambdaBuilder<Builder> {
 
     protected boolean firstSet = true;
 
+    @Autowired
     protected AbstractAdapter adapter;
     protected com.arrety.domainrepository.domainpersistence.common.StringBuilder sql = new com.arrety.domainrepository.domainpersistence.common.StringBuilder();
     protected List<Object> values = new ArrayList<>();
 
-    public AbstractLambdaBuilder() {
-        //适配器
-        this.adapter = new JdbcTemplateAdapter();
-    }
-
-    @Autowired
-    public final void setAdapter(JdbcTemplateAdapter jdbcTemplateAdapter){
-        this.adapter = jdbcTemplateAdapter;
-    }
 
     public void clear(){
         sql.clear();

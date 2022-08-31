@@ -23,6 +23,6 @@ public class OrderDomain extends RequestDomain<OrderDomain> {
     /**
      * 子单聚合
      */
-    @JoinOn(joinId = "slaveOrderInfo.masterOrderId")
+    @JoinOn(joinId = "slaveOrderInfo.masterOrderInfoId")
     public List<SlaveOrder> slaveOrder;
 }

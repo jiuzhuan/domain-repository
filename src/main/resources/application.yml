@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:mem:testdb;IGNORECASE=TRUE;DATABASE_TO_UPPER=FALSE;
     username: arrety
     password: arrety
   h2:

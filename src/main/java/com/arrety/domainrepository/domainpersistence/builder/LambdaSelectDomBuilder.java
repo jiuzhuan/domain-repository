@@ -10,10 +10,8 @@ import com.arrety.domainrepository.domainpersistence.interfaces.Func;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
-import com.arrety.domainrepository.domainpersistence.common.PropertyNamer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -68,17 +66,16 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
      * // TODO: 2022/4/24 是否可以挪到 SelectDomain里
      * 用于构造聚合嵌套的连接条件
      * @param <T>
-     * @param sqlKeyword
      * @param value
      * @return
      */
-    public <T> LambdaSelectDomBuilder appendSql(String columnName, SqlKeyword sqlKeyword, Object value) {
+    public <T> LambdaSelectDomBuilder appendIn(String columnName, Object value) {
         if (!sql.toString().endsWith("( ")) {
             sql.append(SqlKeyword.AND.getSqlSegment());
         }
         sql.append(columnName)
-                .append(sqlKeyword.getSqlSegment())
-                .append(" ? ");
+                .append(SqlKeyword.IN.getSqlSegment())
+                .append(" (?) ");
         values.add(value);
         return builder;
     }

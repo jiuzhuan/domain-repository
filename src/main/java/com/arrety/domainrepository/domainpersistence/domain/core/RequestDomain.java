@@ -3,9 +3,8 @@ package com.arrety.domainrepository.domainpersistence.domain.core;
 
 import com.arrety.domainrepository.domainpersistence.builder.SFunction;
 import lombok.SneakyThrows;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,15 +15,11 @@ import java.util.List;
  * @date 2022/4/19 14:31 仓库
  */
 @Component
-public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> , ApplicationContextAware {
+public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
 
+    @Autowired
     private ApplicationContext applicationContext;
     public ThreadLocal<DomainSelect<DomEntity>> selectDomainThreadLocal = new ThreadLocal<>();
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 
     @SafeVarargs
     public final <T> DomainSelect<DomEntity> select(SFunction<T, ?>... columns) {

@@ -212,14 +212,14 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
             itemSelectDomain.getRight().selectAll().from(joinTable.getType()).where();
             if (CollectionUtils.isNotEmpty(joinIds)) {
                 itemSelectDomain.getRight().isPrepareSelect = true;
-                itemSelectDomain.getRight().appendSql(PropertyNamer.toUnderline(split[1]), SqlKeyword.IN, new ArrayList<>(joinIds));
+                itemSelectDomain.getRight().appendIn(PropertyNamer.toUnderline(split[1]), new ArrayList<>(joinIds));
             }
             // 子自身的约束
             if (CollectionUtils.isNotEmpty(itemSelectDomain.getRight().joinIds)) {
                 itemSelectDomain.getRight().isPrepareSelect = true;
                 Field item = (Field) itemSelectDomain.getRight().tableFieldMap.get(split[0]);
                 JoinOn joinOn = item.getAnnotation(JoinOn.class);
-                itemSelectDomain.getRight().appendSql(PropertyNamer.toUnderline(joinOn.joinId()), SqlKeyword.IN, new ArrayList<>(itemSelectDomain.getRight().joinIds));
+                itemSelectDomain.getRight().appendIn(PropertyNamer.toUnderline(joinOn.joinId()), new ArrayList<>(itemSelectDomain.getRight().joinIds));
             }
         }
         if (parentDomainSelect != null){
