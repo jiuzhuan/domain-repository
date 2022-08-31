@@ -1,6 +1,6 @@
 package com.github.jiuzhuan.domain.repository.example.repository;
 
-import com.github.jiuzhuan.domain.repository.example.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

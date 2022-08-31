@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.example.entity;
+package com.github.jiuzhuan.domain.repository.example.domain.entity;
 
 import lombok.Data;
 

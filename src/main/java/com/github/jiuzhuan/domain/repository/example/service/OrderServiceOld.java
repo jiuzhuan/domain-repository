@@ -2,8 +2,8 @@ package com.github.jiuzhuan.domain.repository.example.service;
 
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
-import com.github.jiuzhuan.domain.repository.example.entity.MasterOrderInfo;
-import com.github.jiuzhuan.domain.repository.example.entity.SlaveOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.repository.MasterOrderInfoRepository;
 import com.github.jiuzhuan.domain.repository.example.repository.SlaveOrderInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;

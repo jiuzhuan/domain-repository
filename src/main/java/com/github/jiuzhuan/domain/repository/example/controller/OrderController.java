@@ -2,11 +2,11 @@ package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
-import com.github.jiuzhuan.domain.repository.example.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
-import com.github.jiuzhuan.domain.repository.example.entity.OrderGoodDiscountInfo;
-import com.github.jiuzhuan.domain.repository.example.entity.OrderGoodInfo;
-import com.github.jiuzhuan.domain.repository.example.entity.SlaveOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;

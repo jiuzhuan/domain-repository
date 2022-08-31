@@ -1,6 +1,6 @@
 package com.github.jiuzhuan.domain.repository.example.repository;
 
-import com.github.jiuzhuan.domain.repository.example.entity.SlaveOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

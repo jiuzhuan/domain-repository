@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.example.entity;
+package com.github.jiuzhuan.domain.repository.example.domain.entity;
 
 import lombok.Data;
 
@@ -7,10 +7,10 @@ import lombok.Data;
  * @date 2022/5/14 13:45
  */
 @Data
-public class OrderGoodDiscountInfo {
+public class OrderGoodInfo {
 
     public Integer id;
     public Integer slaveOrderInfoId;
-    public Double discount;
+    public String goodName;
 
 }

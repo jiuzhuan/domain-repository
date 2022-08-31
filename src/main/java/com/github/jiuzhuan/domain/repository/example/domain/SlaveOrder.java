@@ -2,9 +2,9 @@ package com.github.jiuzhuan.domain.repository.example.domain;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
-import com.github.jiuzhuan.domain.repository.example.entity.OrderGoodDiscountInfo;
-import com.github.jiuzhuan.domain.repository.example.entity.OrderGoodInfo;
-import com.github.jiuzhuan.domain.repository.example.entity.SlaveOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import lombok.Data;
 
 import java.util.List;
