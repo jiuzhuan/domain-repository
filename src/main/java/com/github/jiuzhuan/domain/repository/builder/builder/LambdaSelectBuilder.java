@@ -38,6 +38,7 @@ public class LambdaSelectBuilder extends AbstractWhereLambdaBuilder<LambdaSelect
      * @return
      */
     public <T> LambdaSelectBuilder select(SFunction<T, ?>... columns) {
+        clear();
         List<String> columnStrings = new ArrayList<>();
         for (SFunction<T, ?> column : columns) {
             String columnName = getColumn(column);
@@ -49,6 +50,7 @@ public class LambdaSelectBuilder extends AbstractWhereLambdaBuilder<LambdaSelect
     }
 
     public LambdaSelectBuilder selectAll() {
+        clear();
         sql.append(" * ");
         firstSet();
         return builder;

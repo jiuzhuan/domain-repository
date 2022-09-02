@@ -2,6 +2,7 @@ package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author arrety
@@ -26,23 +29,18 @@ public class OrderController {
     @Autowired
     OrderDomain orderDomain;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    LambdaSelectBuilder lambdaSelectBuilder;
-
-
     @GetMapping("getOrder")
     public List<Order> getOrder(@RequestParam("orderId") Integer orderId){
-
-        List<Map<String, Object>> maps = jdbcTemplate.queryForList("select * from master_order_info where id = ?", orderId);
-
-        lambdaSelectBuilder.clear();
-        List<MasterOrderInfo> masterOrderInfos = lambdaSelectBuilder.selectAll().from(MasterOrderInfo.class)
-                .where().eq(MasterOrderInfo::getId, orderId).selectList(MasterOrderInfo.class);
-
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId).selectList(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        return orderDomain.get();
+    }
+
+    @GetMapping("getOrders")
+    public List<Order> getOrders(){
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().selectList(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);

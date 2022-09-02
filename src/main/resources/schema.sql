@@ -29,3 +29,11 @@ INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (2, 1
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (3, 2, '香辣鸡腿堡');
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (4, 2, '可乐');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (5, 2, 0.8);
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (3, 1, '肯德基');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 3, '蛋挞');
+INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (6, 3, 0.9);
+
+INSERT INTO master_order_info (id, user_name) values (2, '小李');
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 2, '老乡鸡');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (6, 4, '鸡汤');
+INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (7, 4, 0.8);
