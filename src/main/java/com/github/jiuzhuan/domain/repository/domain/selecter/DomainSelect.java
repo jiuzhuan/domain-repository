@@ -52,6 +52,10 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      */
     private boolean isInitSelect = false;
     /**
+     * 是否已经向父聚合注入过
+     */
+    private boolean hasSetIntoParent = false;
+    /**
      * 是否准备好初始化查询sql
      */
     private boolean isPrepareSelect = false;
@@ -138,13 +142,13 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param value
      */
     @Override
-    protected void mapToObject(String[] tableAndCol, int i, Object value) {
+    protected void mapToObject(String[] tableAndCol, Integer i, Object value) {
         // 固定自身索引和约束
         selfConstraint(tableAndCol, i, value);
         // 向上固定索引和约束
-        upConstraint(tableAndCol, i, value);
+        upConstraint(tableAndCol, null, value);
         // 向下固定索引和约束
-        downConstraint(tableAndCol, i, value);
+        downConstraint(tableAndCol, null, value);
     }
 
     /**
@@ -153,7 +157,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param i
      * @param value
      */
-    private void selfConstraint(String[] tableAndCol, int i, Object value) {
+    private void selfConstraint(String[] tableAndCol, Integer i, Object value) {
         if (tableFieldMap.get(tableAndCol[0]) == null) {
             return;
         }
@@ -166,7 +170,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         if (ObjectUtils.equals(joinId, map)) {
             isInitSelect = true;
             // 索引
-            domIdMap.put(value, i);
+            if (i != null) domIdMap.put(value, i);
             // 约束
             joinIds.add(value);
         }
@@ -178,7 +182,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param i
      * @param value
      */
-    private void downConstraint(String[] tableAndCol, int i, Object value) {
+    private void downConstraint(String[] tableAndCol, Integer i, Object value) {
         for (DomainSelect itemDomain : itemDomainSelect) {
             itemDomain.selfConstraint(tableAndCol, i, value);
             itemDomain.downConstraint(tableAndCol, i, value);
@@ -191,7 +195,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param i
      * @param value
      */
-    private void upConstraint(String[] tableAndCol, int i, Object value) {
+    private void upConstraint(String[] tableAndCol, Integer i, Object value) {
         if (parentDomainSelect != null) {
             parentDomainSelect.selfConstraint(tableAndCol, i, value);
             parentDomainSelect.upConstraint(tableAndCol, i, value);
@@ -261,7 +265,8 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 //配合[读缓存]可以避免重复调用
                 items = itemSelectDomainPair.getRight().getEntity(entityClass);
                 //注入 fixme 某些情况下会重复注入(initSelect)
-                setInDomain(ReflectionUtil.getGenericType(field), field, joinOn.joinId(), itemSelectDomainPair.getRight().domList);
+//                setInDomain(ReflectionUtil.getGenericType(field), field, joinOn.joinId(), itemSelectDomainPair.getRight().domList);
+                initSelect();
             }
             return items;
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -280,19 +285,18 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         if (isPrepareSelect) {
             selectList(domClass);
         }
-        if (!isInitSelect){
-            for (DomainSelect domainSelect : itemDomainSelect) {
-                if (!domainSelect.isPrepareSelect) {
-                    continue;
-                }
-                domainSelect.initSelect();
-                Class joinClass = domainSelect.parentJoinClass;
-                Field field = tableFieldMap.get(StringUtils.uncapitalize(joinClass.getSimpleName()));
-                JoinOn joinOn = field.getAnnotation(JoinOn.class);
-                //配合[读缓存]可以避免重复调用
-                List items = domainSelect.getEntity(joinClass);
-                setInDomain(ReflectionUtil.getGenericType(field), field, joinOn.joinId(), domainSelect.domList);
+        for (DomainSelect domainSelect : itemDomainSelect) {
+            if (!domainSelect.isInitSelect || hasSetIntoParent) {
+                continue;
             }
+            hasSetIntoParent = true;
+            domainSelect.initSelect();
+            Class joinClass = domainSelect.parentJoinClass;
+            Field field = tableFieldMap.get(StringUtils.uncapitalize(joinClass.getSimpleName()));
+            JoinOn joinOn = field.getAnnotation(JoinOn.class);
+            //配合[读缓存]可以避免重复调用
+            List items = domainSelect.getEntity(joinClass);
+            setInDomain(ReflectionUtil.getGenericType(field), field, joinOn.joinId(), domainSelect.domList);
         }
         return domList;
     }

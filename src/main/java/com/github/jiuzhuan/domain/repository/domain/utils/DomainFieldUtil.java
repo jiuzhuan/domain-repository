@@ -107,12 +107,12 @@ public class DomainFieldUtil {
     public static void setField(Object target, Object value, Field field) {
         Object targetValue = field.get(target);
         if (ObjectUtils.equals(field.getType(), List.class)) {
-//            List list = (List) targetValue;
-//            if (list != null) {
-//                list.add(value);
-//            } else {
-            field.set(target, Lists.newArrayList(value));
-//            }
+            List list = (List) targetValue;
+            if (list != null) {
+                list.add(value);
+            } else {
+                field.set(target, Lists.newArrayList(value));
+            }
         } else {
             if (targetValue != null) {
                 ReflectionUtil.mergeProperties(targetValue, value);

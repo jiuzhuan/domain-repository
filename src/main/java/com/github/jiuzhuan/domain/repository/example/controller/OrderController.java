@@ -38,6 +38,16 @@ public class OrderController {
         return orderDomain.get();
     }
 
+    @GetMapping("getOrderByOrderGoodInfoId")
+    public List<Order> getOrder2(@RequestParam("orderGoodInfoId") Integer orderGoodInfoId){
+        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, orderGoodInfoId).selectList(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(MasterOrderInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        return orderDomain.get();
+    }
+
     @GetMapping("getOrders")
     public List<Order> getOrders(){
         orderDomain.selectAll().from(MasterOrderInfo.class).where().selectList(Order.class);

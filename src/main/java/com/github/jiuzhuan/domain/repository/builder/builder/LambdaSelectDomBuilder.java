@@ -170,7 +170,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
      * @param i
      * @param value
      */
-    protected void mapToObject(String[] tableAndCol, int i, Object value) {
+    protected void mapToObject(String[] tableAndCol, Integer i, Object value) {
     }
 
     public void clear(){
