@@ -39,9 +39,18 @@ public class OrderController {
     }
 
     @GetMapping("getOrderByOrderGoodInfoId")
-    public List<Order> getOrder2(@RequestParam("orderGoodInfoId") Integer orderGoodInfoId){
+    public List<Order> getOrderByOrderGoodInfoId(@RequestParam("orderGoodInfoId") Integer orderGoodInfoId){
         orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, orderGoodInfoId).selectList(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(MasterOrderInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        return orderDomain.get();
+    }
+
+    @GetMapping("getOrderBySlaveOrderInfoId")
+    public List<Order> getOrderBySlaveOrderInfoId(@RequestParam("slaveOrderInfoId") Integer slaveOrderInfoId){
+        orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, slaveOrderInfoId).selectList(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);

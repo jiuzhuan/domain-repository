@@ -1,5 +1,5 @@
 
--- Ä¬ÈÏÇé¿öÏÂ, springbootÆô¶¯Ê±×Ô¶¯Ö´ĞĞsql
+-- é»˜è®¤æƒ…å†µä¸‹, springbootå¯åŠ¨æ—¶è‡ªåŠ¨æ‰§è¡Œsql
 CREATE TABLE master_order_info
 (
     id        INT  AUTO_INCREMENT  PRIMARY KEY,
@@ -24,16 +24,16 @@ CREATE TABLE order_good_discount_info
     discount            DECIMAL(10,2) comment 'discount'
 );
 
-INSERT INTO master_order_info (id, user_name) values (1, 'ÀÏÍõ');
-INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (2, 1, 'Âóµ±ÀÍ');
-INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (3, 2, 'ÏãÀ±¼¦ÍÈ±¤');
-INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (4, 2, '¿ÉÀÖ');
+INSERT INTO master_order_info (id, user_name) values (1, 'è€ç‹');
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (2, 1, 'éº¦å½“åŠ³');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (3, 2, 'é¦™è¾£é¸¡è…¿å ¡');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (4, 2, 'å¯ä¹');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (5, 2, 0.8);
-INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (3, 1, '¿ÏµÂ»ù');
-INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 3, 'µ°Ì¢');
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (3, 1, 'è‚¯å¾·åŸº');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 3, 'è›‹æŒ');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (6, 3, 0.9);
 
-INSERT INTO master_order_info (id, user_name) values (2, 'Ğ¡Àî');
-INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 2, 'ÀÏÏç¼¦');
-INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (6, 4, '¼¦ÌÀ');
+INSERT INTO master_order_info (id, user_name) values (2, 'å°æ');
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 2, 'è€ä¹¡é¸¡');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (6, 4, 'é¸¡æ±¤');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (7, 4, 0.8);

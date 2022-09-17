@@ -152,7 +152,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
                 for (Map.Entry<String, Object> entry : map.entrySet()) {
                     //注入聚合实体
                     String[] tableAndCol = entry.getKey().split(ASFLAG);
-                    // TODO: 2022/4/25 map整体注入 处理list
+                    // TODO: 2022/4/25 map整体注入 处理list: 直接上层list分组 间接上层list要等父聚合初始化后再分组!!!!!!!
                     DomainFieldUtil.set(domObject, tableAndCol[0], tableAndCol[1], entry.getValue());
                     this.mapToObject(tableAndCol, i, entry.getValue());
                 }

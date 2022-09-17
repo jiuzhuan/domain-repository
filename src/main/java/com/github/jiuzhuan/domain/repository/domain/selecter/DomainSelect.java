@@ -66,6 +66,11 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     private LambdaSelectItemBuilder itemSelectBuilder;
     /**
      * 表对应的子聚合(解决嵌套聚合问题)
+     * key: 本聚合的所有表名(包含嵌套的不包含子聚合本身, 用以通过表名获取value)
+     * value:
+     *      class: 表名对应的类
+     *      String: joinId
+     *      DomainSelect: 表所在的子聚合
      */
     private Map<String, Triple<Class, String, DomainSelect>> tableSelectDomainMap = new HashMap<>();
     /**
@@ -82,6 +87,8 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     private Class<?> parentJoinClass = null;
     /**
      * 表对应的子聚合对应的属性
+     * key: 表名
+     * value: 如果该表是本聚合内的-则value为表对应的属性, 如果该表是子聚合内的, 则value为子聚合
      */
     private Map<String, Field> tableFieldMap = new HashMap<>();
 
@@ -109,7 +116,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         //重写方法的话... 由于父方法方法是泛型方法, 而本类是泛型类, 所以必须强转
         this.domClass = (Class<DomEntity>) domClass;
 
-        //领域初始化
+        //领域初始化 todo 这一步应该可以提前到应用启动阶段 并且应该只执行一次
         initDomain(null);
 
         //聚合查询, 通过结果集映射拓展方法传播约束和索引
@@ -143,11 +150,11 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      */
     @Override
     protected void mapToObject(String[] tableAndCol, Integer i, Object value) {
-        // 固定自身索引和约束
+        // 固定自身索引和约束 索引:一对多 约束:where条件
         selfConstraint(tableAndCol, i, value);
-        // 向上固定索引和约束
+        // 向上固定约束
         upConstraint(tableAndCol, null, value);
-        // 向下固定索引和约束
+        // 向下固定约束
         downConstraint(tableAndCol, null, value);
     }
 
@@ -264,7 +271,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 initSelect();
                 //配合[读缓存]可以避免重复调用
                 items = itemSelectDomainPair.getRight().getEntity(entityClass);
-                //注入 fixme 某些情况下会重复注入(initSelect)
+                //注入 第一次注入后父类list里引用了子类的list  所以后续无需再次注入到父类 但第一次要先执行中间查询 所以前后都会有一次 initSelect()
 //                setInDomain(ReflectionUtil.getGenericType(field), field, joinOn.joinId(), itemSelectDomainPair.getRight().domList);
                 initSelect();
             }
@@ -286,7 +293,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
             selectList(domClass);
         }
         for (DomainSelect domainSelect : itemDomainSelect) {
-            if (!domainSelect.isInitSelect || hasSetIntoParent) {
+            if (domainSelect.isInitSelect || hasSetIntoParent) {
                 continue;
             }
             hasSetIntoParent = true;
