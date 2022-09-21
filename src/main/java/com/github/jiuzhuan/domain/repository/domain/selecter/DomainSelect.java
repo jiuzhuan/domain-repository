@@ -154,7 +154,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         constraints = parentNodeConstraintMap.get(entityTreeNode);
         if (constraints != null) return getItem(entityClass, entityTreeNode.parentJoinField, constraints);
 
-        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类) todo 最短路径
+        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类) todo 最短路径 初始化树的时候遍历记下所有节点到所有别的节点的距离?
         List<DomainTreeNode> domainTreeNodePath = domainTree.recentKnownNode(entityTreeNode, nodeConstraintMap.keySet());
 
         // 将路径上所有实体查询都执行以getEntity() 以传播约束
