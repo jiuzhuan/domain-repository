@@ -14,10 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 聚合查询构造器
@@ -39,7 +36,16 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
      * 表和字段映射缓存
      */
     private Map<String, Object> fieldValueMap = new HashMap<>();
-
+    /**
+     * 全部结果
+     * key: 实体类
+     * value: 该实体对应表的全部结果
+     */
+    protected Map<Class<?>, List<Object>> data = new HashMap<>();
+    /**
+     * 表名-实体类
+     */
+    private Map<String, Class<?>> tables = new HashMap<>();
 
     @Override
     public <T> LambdaSelectDomBuilder orderBy(SFunction<T, ?> column, boolean isAsc) {
@@ -119,6 +125,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
         }
         sql.append(" from ")
                 .append(PropertyNamer.toUnderline(clazz.getSimpleName()));
+        tables.put(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
         adapter.resolveDatabase(clazz);
         return builder;
     }
@@ -134,6 +141,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
             }
             String replaceAll = sql.toString().replaceAll("select", sel.toString());
             sql = new com.github.jiuzhuan.domain.repository.common.utils.StringBuilder(replaceAll);
+            tables.put(StringUtils.uncapitalize(clazz.getSimpleName()), clazz);
         }
         return super.leftJoin(clazz);
     }
@@ -141,36 +149,43 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
     /**
      * 聚合查询(可联表)
      */
-    public <T> List<T> selectList(Class<T> domClass) {
+    public Map<Class<?>, List<Object>> execute() {
         try {
-            DomainFieldCache.init(domClass);
-            List<Map<String, Object>> list = adapter.selectMapList(sql.toString(), values);
-            List<T> domList =new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                Map<String, Object> map = list.get(i);
-                T domObject = (T)domClass.getDeclaredConstructors()[0].newInstance();
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    //注入聚合实体
+            List<Map<String, Object>> rows = adapter.selectMapList(sql.toString(), values);
+            Map<Class<?>, List<Object>> result = new HashMap<>();
+            for (Map<String, Object> row : rows) {
+                // 构造这一行的多个不同实体
+                Map<Class<?>, Object> tableItemMap = new HashMap<>();
+                for (Map.Entry<String, Object> entry : row.entrySet()) {
                     String[] tableAndCol = entry.getKey().split(ASFLAG);
-                    // TODO: 2022/4/25 map整体注入 处理list: 直接上层list分组 间接上层list要等父聚合初始化后再分组!!!!!!!
-                    DomainFieldUtil.set(domObject, tableAndCol[0], tableAndCol[1], entry.getValue());
-                    this.mapToObject(tableAndCol, i, entry.getValue());
+                    Class<?> tableClass = tables.get(tableAndCol[0]);
+                    if (tableItemMap.get(tableClass) == null) {
+                        Object item = tableClass.getDeclaredConstructors()[0].newInstance();
+                        tableItemMap.put(tableClass, item);
+                    }
                 }
-                domList.add(domObject);
+                // 赋值
+                for (Map.Entry<String, Object> entry : row.entrySet()) {
+                    String[] tableAndCol = entry.getKey().split(ASFLAG);
+                    Class<?> tableClass = tables.get(tableAndCol[0]);
+                    Object item = tableItemMap.get(tableClass);
+                    Field field = item.getClass().getField(tableAndCol[1]);
+                    field.set(item, entry.getValue());
+                }
+                for (Map.Entry<Class<?>, Object> entry : tableItemMap.entrySet()) {
+                    List<Object> values = result.get(entry.getKey());
+                    if (values == null) {
+                        result.put(entry.getKey(), Arrays.asList(entry.getValue()));
+                    } else {
+                        values.add(entry.getValue());
+                    }
+                }
             }
-            return domList;
-        } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
-            throw new ReflectionException("@JoinOn error ", e);
+            data.putAll(result);
+            return result;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchFieldException e) {
+            throw new ReflectionException(e);
         }
-    }
-
-    /**
-     * 结果集聚合映射拓展方法
-     * @param tableAndCol
-     * @param i
-     * @param value
-     */
-    protected void mapToObject(String[] tableAndCol, Integer i, Object value) {
     }
 
     public void clear(){

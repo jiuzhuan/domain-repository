@@ -31,7 +31,8 @@ public class OrderController {
 
     @GetMapping("getOrder")
     public List<Order> getOrder(@RequestParam("orderId") Integer orderId){
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId).selectList(Order.class);
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId);
+        orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
@@ -40,7 +41,8 @@ public class OrderController {
 
     @GetMapping("getOrderByOrderGoodInfoId")
     public List<Order> getOrderByOrderGoodInfoId(@RequestParam("orderGoodInfoId") Integer orderGoodInfoId){
-        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, orderGoodInfoId).selectList(Order.class);
+        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, orderGoodInfoId);
+        orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
@@ -50,7 +52,8 @@ public class OrderController {
 
     @GetMapping("getOrderBySlaveOrderInfoId")
     public List<Order> getOrderBySlaveOrderInfoId(@RequestParam("slaveOrderInfoId") Integer slaveOrderInfoId){
-        orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, slaveOrderInfoId).selectList(Order.class);
+        orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, slaveOrderInfoId);
+        orderDomain.execute(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
@@ -59,7 +62,8 @@ public class OrderController {
 
     @GetMapping("getOrders")
     public List<Order> getOrders(){
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().selectList(Order.class);
+        orderDomain.selectAll().from(MasterOrderInfo.class).where();
+        orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);

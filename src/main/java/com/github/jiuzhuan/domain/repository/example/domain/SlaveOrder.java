@@ -20,18 +20,18 @@ public class SlaveOrder {
     /**
      * 子单实体
      */
-    @JoinOn(joinId = "id")
+    @JoinOn(joinEntity = SlaveOrderInfo.class, joinField = "id")
     public SlaveOrderInfo slaveOrderInfo;
 
     /**
      * 明细实体
      */
-    @JoinOn(joinId = "slaveOrderInfoId")
+    @JoinOn(joinEntity = OrderGoodInfo.class, joinField = "slaveOrderInfoId")
     public List<OrderGoodInfo> orderGoodInfo;
 
     /**
      * 优惠分摊实体
      */
-    @JoinOn(joinId = "slaveOrderInfoId")
+    @JoinOn(joinEntity = OrderGoodDiscountInfo.class, joinField = "slaveOrderInfoId")
     public OrderGoodDiscountInfo orderGoodDiscountInfo;
 }

@@ -8,7 +8,5 @@ import java.util.List;
  */
 public interface DomainRepository {
 
-    <T> List<T> selectList(Class<T> domClass);
-
     <T> List<T> getEntity(Class<T> entityClass);
 }

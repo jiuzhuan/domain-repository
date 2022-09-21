@@ -1,5 +1,6 @@
 package com.github.jiuzhuan.domain.repository.domain.annotation;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -17,5 +18,7 @@ import java.lang.annotation.Target;
 @Component
 public @interface JoinOn {
 
-    String joinId();
+    String joinField();
+
+    Class<?> joinEntity();
 }

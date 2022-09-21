@@ -3,6 +3,7 @@ package com.github.jiuzhuan.domain.repository.example.domain;
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import lombok.Data;
 
 import java.util.List;
@@ -18,12 +19,12 @@ public class Order {
     /**
      * 主单实体
      */
-    @JoinOn(joinId = "id")
+    @JoinOn(joinEntity = MasterOrderInfo.class, joinField = "id")
     public MasterOrderInfo masterOrderInfo;
 
     /**
      * 子单聚合
      */
-    @JoinOn(joinId = "slaveOrderInfo.masterOrderInfoId")
+    @JoinOn(joinEntity = SlaveOrderInfo.class, joinField = "slaveOrderInfo.masterOrderInfoId")
     public List<SlaveOrder> slaveOrder;
 }

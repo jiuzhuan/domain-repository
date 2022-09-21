@@ -4,6 +4,7 @@ import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.selecter.DomainSelect;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -95,42 +96,6 @@ public class DomainFieldCache {
         List<Field> fields = classTableColumnMap.get(className).get(tableName).values().stream().findFirst().get();
         fields = fields.subList(0, fields.size() - 1);
         return fields;
-    }
-
-    /**
-     * 解析父聚合中的表对应的子聚合, 以及表对应的子聚合在父聚合中的属性
-     * @param domClass
-     * @param tableSelectDomainMap
-     * @param selectDomainMap
-     * @param tableFieldMap
-     * @param field
-     */
-    @SneakyThrows
-    public static void initDomain(Class<?> domClass, List<DomainSelect> itemDomainSelect,
-                                  Map<String, Triple<Class, String, DomainSelect>> tableSelectDomainMap,
-                                  Triple<Class, String, DomainSelect> selectDomainMap, Map<String, Field> tableFieldMap,
-                                  Field field, Class<?> parentJoinClass) {
-        for (Field declaredField : domClass.getDeclaredFields()) {
-            declaredField.setAccessible(true);
-            Class<?> tableType = ReflectionUtil.getGenericType(declaredField);
-            Dom dom = tableType.getAnnotation(Dom.class);
-            if (dom != null) {
-                String joinId = declaredField.getAnnotation(JoinOn.class).joinId();
-                Class<?> joinClass = ReflectionUtil.getGenericType(tableType.getDeclaredField(joinId.split("\\.")[0]));
-                DomainSelect<?> itemDomain = (DomainSelect)applicationContext.getBean(DomainSelect.class, tableType, joinClass);
-                itemDomainSelect.add(itemDomain);
-                Triple<Class, String, DomainSelect> selectDomainPair = Triple.of(tableType, joinId, itemDomain);
-                tableSelectDomainMap.put(declaredField.getName(), selectDomainPair);
-                initDomain(tableType, itemDomainSelect, tableSelectDomainMap, selectDomainPair, tableFieldMap, declaredField, parentJoinClass);
-            } else {
-                if (field == null) {
-                    tableFieldMap.put(declaredField.getName(), declaredField);
-                } else {
-                    tableFieldMap.put(declaredField.getName(), field);
-                }
-                tableSelectDomainMap.put(declaredField.getName(), selectDomainMap);
-            }
-        }
     }
 
 }

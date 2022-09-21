@@ -38,8 +38,9 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
     }
 
     @SneakyThrows
-    public <T> List<T> selectList(Class<T> domClass) {
-        return selectDomainThreadLocal.get().selectList(domClass);
+    public <T> List<T> execute(Class<T> tClass) {
+        selectDomainThreadLocal.get().execute(tClass);
+        return selectDomainThreadLocal.get().get();
     }
 
     public <T> List<T> getEntity(Class<T> entityClass) {
