@@ -25,6 +25,6 @@ public class Order {
     /**
      * 子单聚合
      */
-    @JoinOn(joinEntity = SlaveOrderInfo.class, joinField = "slaveOrderInfo.masterOrderInfoId")
+    @JoinOn(joinEntity = SlaveOrderInfo.class, joinField = "masterOrderInfoId")
     public List<SlaveOrder> slaveOrder;
 }

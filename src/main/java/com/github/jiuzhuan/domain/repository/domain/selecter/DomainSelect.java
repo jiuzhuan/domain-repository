@@ -6,6 +6,7 @@ import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCache;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
+import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,6 +50,11 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     private Map<DomainTreeNode, HashSet<Object>> nodeConstraintMap = new HashMap<>();
 
     /**
+     * 父对子的约束
+     */
+    private Map<DomainTreeNode, HashSet<Object>> parentNodeConstraintMap = new HashMap<>();
+
+    /**
      * 关联查询构造器
      */
     @Autowired
@@ -73,19 +80,29 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
         for (Map.Entry<Class<?>, List<Object>> classListEntry : classListMap.entrySet()) {
 
-            // 设置对子节点的约束
             DomainTreeNode entityNode = domainTree.getNodeByEntity(classListEntry.getKey());
-            List<Object> joinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.entityJoinField);
+
+            // 设置对自身的约束
+            List<Object> selfJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.entityJoinField);
+            nodeConstraintMap.computeIfAbsent(entityNode, k -> new HashSet<>());
+            nodeConstraintMap.get(entityNode).addAll(new HashSet<>(selfJoinIds));
+
+            // 设置对子节点的约束
             for (DomainTreeNode subNode : entityNode.subNodes) {
-                nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>());
-                nodeConstraintMap.get(entityNode).addAll(new HashSet<>(joinIds));
+                if (subNode.parentJoinField == null) {
+                    nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>());
+                    nodeConstraintMap.get(subNode).addAll(new HashSet<>(selfJoinIds));
+                } else {
+                    parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>());
+                    parentNodeConstraintMap.get(subNode).addAll(new HashSet<>(selfJoinIds));
+                }
             }
 
             // 设置对父节点的约束
-            List<Object> joinIds2 = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.parentNode.entityJoinField);
-            if (entityNode.parentNode !=null) {
-                nodeConstraintMap.computeIfAbsent(entityNode, k -> new HashSet<>());
-                nodeConstraintMap.get(entityNode).addAll(new HashSet<>(joinIds2));
+            if (entityNode.parentNode != null && entityNode.parentJoinField != null) {
+                List<Object> parentJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.parentJoinField);
+                nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>());
+                nodeConstraintMap.get(entityNode.parentNode).addAll(new HashSet<>(parentJoinIds));
             }
         }
     }
@@ -103,7 +120,15 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
             return (List<T>)domList;
         }
 
-        // todo 结构化: data -> domList
+        // todo 结构化: data -> domList 根节点/分组
+        Object dom = domClass.getDeclaredConstructors()[0].newInstance();
+        for (Field field : domClass.getDeclaredFields()) {
+            Class<?> fieldType = ReflectionUtil.getGenericType(field);
+            List<Object> fieldValues = data.get(fieldType);
+            ClassReflection.setFieldValue(dom, field, fieldValues);
+        }
+
+        domList.add((DomEntity)dom);
 
         return (List<T>)domList;
     }
@@ -118,20 +143,18 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
         // 读缓存(如果已经有了就不再查询)
         List<T> items = (List<T>) data.get(entityClass);
-        if (items != null) {
-            return items;
-        }
+        if (items != null) return items;
 
         // 获取实体对应的字段, 如果实体在子聚合里则获取对应的子聚合
         DomainTreeNode entityTreeNode = domainTree.getNodeByEntity(entityClass);
 
-        // 如果本层有约束 则直接执行sql查询
+        // 如果本层有约束(自身约束或父约束) 则直接执行sql查询
         HashSet<Object> constraints = nodeConstraintMap.get(entityTreeNode);
-        if (constraints != null) {
-            return getItem(entityClass, entityTreeNode.entityJoinField, constraints);
-        }
+        if (constraints != null) return getItem(entityClass, entityTreeNode.entityJoinField, constraints);
+        constraints = parentNodeConstraintMap.get(entityTreeNode);
+        if (constraints != null) return getItem(entityClass, entityTreeNode.parentJoinField, constraints);
 
-        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类)
+        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类) todo 最短路径
         List<DomainTreeNode> domainTreeNodePath = domainTree.recentKnownNode(entityTreeNode, nodeConstraintMap.keySet());
 
         // 将路径上所有实体查询都执行以getEntity() 以传播约束
@@ -157,6 +180,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         HashMap<Class<?>, List<Object>> current = new HashMap<>();
         current.put(entityClass, (List<Object>) items);
         setConstraint(current);
+        data.putAll(current);
         return items;
     }
 }

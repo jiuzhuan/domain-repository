@@ -21,14 +21,20 @@ public class DomainTreeNode {
     public List<DomainTreeNode> subNodes = new ArrayList<>();
 
     /**
-     * 自身的约束字段
+     * 自身的约束字段（出箭头）
      */
     public String entityJoinField;
 
+    /**
+     * 自身的约束字段（入箭头）
+     */
+    public String parentJoinField;
 
-    public DomainTreeNode(Class<?> entityClass, DomainTreeNode parentNode, String entityJoinField) {
+
+    public DomainTreeNode(Class<?> entityClass, DomainTreeNode parentNode, String entityJoinField, String parentJoinField) {
         this.entityClass = entityClass;
         this.parentNode = parentNode;
         this.entityJoinField = entityJoinField;
+        this.parentJoinField = parentJoinField;
     }
 }

@@ -39,7 +39,6 @@ public class DomainTreeCache {
     }
 
     private static void buildDomainTreeNode(Class<?> domainClass, DomainTree domainTree, DomainTreeNode parentNode) {
-        // // TODO: 2022/9/21 到底要怎么构建啊啊啊
         for (Field declaredField : domainClass.getDeclaredFields()) {
             // 没有JoinOn注解的忽略
             JoinOn joinOn = declaredField.getAnnotation(JoinOn.class);
@@ -49,8 +48,13 @@ public class DomainTreeCache {
             Dom dom = entityType.getAnnotation(Dom.class);
             if (dom == null) {
                 // 实体
+                // 如果是聚合的父节点 则不再创建
+                if (parentNode != null && entityType.equals(parentNode.entityClass)) {
+                    parentNode.entityJoinField = joinOn.joinField();
+                    continue;
+                }
                 // 创建子节点
-                DomainTreeNode currentNode = new DomainTreeNode(entityType, null, joinOn.joinField());
+                DomainTreeNode currentNode = new DomainTreeNode(entityType, null, joinOn.joinField(), null);
 
                 // 没有父节点 那么第一个属性就作为父节点(约定)
                 if (parentNode == null) {
@@ -66,9 +70,18 @@ public class DomainTreeCache {
                 // 实体 - 加入索引
                 domainTree.entityNodeMap.put(entityType, currentNode);
             } else {
-                // 聚合
+                // 聚合 - 先创建聚合的父节点
+                DomainTreeNode currentNode = new DomainTreeNode(joinOn.joinEntity(), parentNode, null, joinOn.joinField());
+
+                // 构建子节点属性
+                currentNode.parentNode = parentNode;
+                parentNode.subNodes.add(currentNode);
+
+                // 实体 - 加入索引
+                domainTree.entityNodeMap.put(joinOn.joinEntity(), currentNode);
+
                 // 加入下一层
-                buildDomainTreeNode(entityType, domainTree, parentNode);
+                buildDomainTreeNode(entityType, domainTree, currentNode);
             }
         }
     }
