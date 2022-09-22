@@ -2,6 +2,7 @@ package com.github.jiuzhuan.domain.repository.domain.selecter;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectDomBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectItemBuilder;
+import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCache;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
@@ -35,12 +36,12 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     private Class<DomEntity> domClass;
 
     /**
-     * 聚合实体查询结果
+     * 聚合实体查询结果(引用父类属性 {@link LambdaSelectDomBuilder.data})
      */
-    public List<DomEntity> domList = new ArrayList<>();
+    public List<DomEntity> domList = null;
 
     /**
-     * 聚合树
+     * 聚合树(有缓存)
      */
     private DomainTree domainTree;
 
@@ -61,6 +62,11 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     private LambdaSelectItemBuilder itemSelectBuilder;
 
 
+    /**
+     * 初始化查询
+     * @param tClass
+     * @return
+     */
     public Map<Class<?>, List<Object>> execute(Class tClass) {
 
         // 由于泛型擦除机制 所以只能在执行时传入泛型...
@@ -108,7 +114,9 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     /**
-     * 初始化查询
+     * 获取结构化的结果
+     * data -> domList, 未知节点的子节点虽然可以按parentJoinField分组, 但是自身无法分组(没有明确的值), 所以未知节点及以上无法结构化
+     *
      * @return 结果
      * @param <T>
      */
@@ -116,25 +124,77 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     public <T> List<T> get() {
 
         // 读缓存
-        if (CollectionUtils.isNotEmpty(domList)) {
-            return (List<T>)domList;
-        }
+        if (domList != null) return (List<T>) domList;
 
-        // todo 结构化: data -> domList 根节点/分组
-        Object dom = domClass.getDeclaredConstructors()[0].newInstance();
+        //  结构化
+        domList = (List<DomEntity>) struct();
+
+        return (List<T>) domList;
+    }
+
+    private List<?> struct() {
+        // 寻找已知子树的顶节点
+        Optional<Class<?>> nodeClassOpt = data.keySet().stream().findFirst();
+        if (nodeClassOpt.isEmpty()) return null;
+        DomainTreeNode topNode = findClearTopNode(domainTree.getNodeByEntity(nodeClassOpt.get()));
+        List<?> list = setDomain(topNode.parentDomClass, topNode);
+        return list;
+    }
+
+    private DomainTreeNode findClearTopNode(DomainTreeNode node) {
+        DomainTreeNode parentNode = node.parentNode;
+        if (parentNode != null && data.get(parentNode.entityClass) != null) {
+            return findClearTopNode(parentNode);
+        } else {
+            return node;
+        }
+    }
+
+    public <T> List<T> setDomain(Class<T> domClass, DomainTreeNode topNode){
+        // 非聚合的实体
+        Field topEntityField = domClass.getDeclaredFields()[0];
+        List<Pair<Field, Class<?>>> domClassEntityFields = new ArrayList<>();
+        List<Pair<Field, Class<?>>> domClassDomainFields = new ArrayList<>();
         for (Field field : domClass.getDeclaredFields()) {
-            Class<?> fieldType = ReflectionUtil.getGenericType(field);
-            List<Object> fieldValues = data.get(fieldType);
-            ClassReflection.setFieldValue(dom, field, fieldValues);
+            Class<?> genericType = ReflectionUtil.getGenericType(field);
+            if (Objects.equals(genericType, topNode.entityClass)) {
+                topEntityField = field;
+            } else if (genericType.isAnnotationPresent(Dom.class)) {
+                domClassDomainFields.add(Pair.of(field, genericType));
+            } else {
+                domClassEntityFields.add(Pair.of(field, genericType));
+            }
+        }
+        List<T> list = new ArrayList<>();
+        List<Object> topValues = data.get(topNode.entityClass);
+        if (topValues == null) return null;
+        for (Object topValue : topValues) {
+            T domInstance = ClassReflection.newInstance(domClass);
+            ClassReflection.setFieldValue(domInstance, topEntityField, topValue);
+            Object id = ClassReflection.getFieldValue(topValue, topNode.entityJoinField);
+            for (Pair<Field, Class<?>> domClassEntityField : domClassEntityFields) {
+                DomainTreeNode entityNode = domainTree.getNodeByEntity(domClassEntityField.getRight());
+                List<Object> subEntitys = data.get(domClassEntityField.getRight());
+                if (subEntitys == null) continue;
+                Map<Object, List<Object>> group = subEntitys.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
+                ClassReflection.setFieldValues(domInstance, domClassEntityField.getLeft(), group.get(id));
+            }
+            for (Pair<Field, Class<?>> domClassDomainField : domClassDomainFields) {
+                DomainTree subDomainTree = DomainTreeCache.get(domClassDomainField.getRight());
+                List<?> subDoms = setDomain(domClassDomainField.getRight(), subDomainTree.rootNode);
+                if (subDoms == null) continue;
+                DomainTreeNode subNode = domainTree.getNodeByEntity(subDomainTree.rootNode.entityClass);
+                Map<Object, List<Object>> subGroup = subDoms.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
+                ClassReflection.setFieldValues(domInstance, domClassDomainField.getLeft(), subGroup.get(id));
+            }
+            list.add(domInstance);
         }
 
-        domList.add((DomEntity)dom);
-
-        return (List<T>)domList;
+        return list;
     }
 
     /**
-     * 关联查询
+     * 关联查询实体
      * @param entityClass
      * @return
      * @param <T>
@@ -181,6 +241,9 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         current.put(entityClass, (List<Object>) items);
         setConstraint(current);
         data.putAll(current);
+
+        // 清缓存
+        domList = null;
         return items;
     }
 }

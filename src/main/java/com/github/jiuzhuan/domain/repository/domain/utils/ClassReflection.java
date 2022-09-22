@@ -1,11 +1,13 @@
 package com.github.jiuzhuan.domain.repository.domain.utils;
 
+import com.github.jiuzhuan.domain.repository.common.exception.ReflectionException;
 import com.google.common.base.Joiner;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -15,6 +17,31 @@ import java.util.*;
  * @date 2022/8/16 20:10
  */
 public class ClassReflection {
+
+    /**
+     * 针对list类型赋值的优化:
+     * 1. 属性非list 值list  set values[0]
+     * 2. 属性list 值list 直接set
+     */
+    public static <T> void setFieldValues(T obj, Field field, List<Object> values) {
+        if (Objects.equals(field.getType(), List.class)) {
+            ClassReflection.setFieldValue(obj, field, values);
+        } else {
+            ClassReflection.setFieldValue(obj, field, values.get(0));
+        }
+    }
+
+    public static <T> T newInstance(Class<T> clazz, Object... paramters){
+        try {
+            Class<?>[] parameterTypes = new Class[paramters.length];
+            for (int i = 0; i < paramters.length; i++) {
+                parameterTypes[i] = paramters[i].getClass();
+            }
+            return clazz.getDeclaredConstructor(parameterTypes).newInstance(paramters);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new ReflectionException(e);
+        }
+    }
 
     /**
      * 反射设置对象的属性值
@@ -110,5 +137,4 @@ public class ClassReflection {
         field.setAccessible(true);
         field.set(obj, value);
     }
-
 }

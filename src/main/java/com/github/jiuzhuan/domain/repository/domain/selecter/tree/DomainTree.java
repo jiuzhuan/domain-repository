@@ -19,6 +19,11 @@ import java.util.*;
 public class DomainTree {
 
     /**
+     * 聚合的根节点
+     */
+    public DomainTreeNode rootNode;
+
+    /**
      * 索引-记录聚合内每个实体在哪一层
      */
     public Map<Class<?>, DomainTreeNode> entityNodeMap = new HashMap<>();

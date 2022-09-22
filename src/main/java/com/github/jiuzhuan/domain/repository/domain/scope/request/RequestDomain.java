@@ -49,7 +49,7 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
 
     @Override
     public List<DomEntity> get() {
-        return this.selectDomainThreadLocal.get().domList;
+        return this.selectDomainThreadLocal.get().get();
     }
 
     /**

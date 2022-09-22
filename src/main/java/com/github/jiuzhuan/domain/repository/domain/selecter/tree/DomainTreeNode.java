@@ -26,15 +26,27 @@ public class DomainTreeNode {
     public String entityJoinField;
 
     /**
-     * 自身的约束字段（入箭头）
+     * 父节点对本节点的约束字段（入箭头）
      */
     public String parentJoinField;
 
+    /**
+     * 所属的聚合
+     */
+    public Class<?> parentDomClass;
 
-    public DomainTreeNode(Class<?> entityClass, DomainTreeNode parentNode, String entityJoinField, String parentJoinField) {
+    /**
+     * 所在属性的属性名
+     */
+    public String fieldName;
+
+
+    public DomainTreeNode(Class<?> parentDomClass, Class<?> entityClass, DomainTreeNode parentNode, String entityJoinField, String parentJoinField, String fieldName) {
+        this.parentDomClass = parentDomClass;
         this.entityClass = entityClass;
         this.parentNode = parentNode;
         this.entityJoinField = entityJoinField;
         this.parentJoinField = parentJoinField;
+        this.fieldName = fieldName;
     }
 }
