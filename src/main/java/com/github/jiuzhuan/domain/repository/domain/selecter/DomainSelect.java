@@ -90,25 +90,25 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
             // 设置对自身的约束
             List<Object> selfJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.entityJoinField);
-            nodeConstraintMap.computeIfAbsent(entityNode, k -> new HashSet<>());
-            nodeConstraintMap.get(entityNode).addAll(new HashSet<>(selfJoinIds));
+            nodeConstraintMap.computeIfAbsent(entityNode, k -> new HashSet<>(selfJoinIds));
 
             // 设置对子节点的约束
             for (DomainTreeNode subNode : entityNode.subNodes) {
                 if (subNode.parentJoinField == null) {
-                    nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>());
-                    nodeConstraintMap.get(subNode).addAll(new HashSet<>(selfJoinIds));
+                    nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
                 } else {
-                    parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>());
-                    parentNodeConstraintMap.get(subNode).addAll(new HashSet<>(selfJoinIds));
+                    parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
                 }
             }
 
             // 设置对父节点的约束
-            if (entityNode.parentNode != null && entityNode.parentJoinField != null) {
-                List<Object> parentJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.parentJoinField);
-                nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>());
-                nodeConstraintMap.get(entityNode.parentNode).addAll(new HashSet<>(parentJoinIds));
+            if (entityNode.parentNode != null) {
+                if (entityNode.parentJoinField != null) {
+                    List<Object> parentJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.parentJoinField);
+                    nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>(parentJoinIds));
+                } else {
+                    nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>(selfJoinIds));
+                }
             }
         }
     }
@@ -170,7 +170,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         if (topValues == null) return null;
         for (Object topValue : topValues) {
             T domInstance = ClassReflection.newInstance(domClass);
-            ClassReflection.setFieldValue(domInstance, topEntityField, topValue);
+            ClassReflection.setFieldValues(domInstance, topEntityField, Arrays.asList(topValue));
             Object id = ClassReflection.getFieldValue(topValue, topNode.entityJoinField);
             for (Pair<Field, Class<?>> domClassEntityField : domClassEntityFields) {
                 DomainTreeNode entityNode = domainTree.getNodeByEntity(domClassEntityField.getRight());
@@ -214,7 +214,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         constraints = parentNodeConstraintMap.get(entityTreeNode);
         if (constraints != null) return getItem(entityClass, entityTreeNode.parentJoinField, constraints);
 
-        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类) todo 最短路径 初始化树的时候遍历记下所有节点到所有别的节点的距离?
+        // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类)
         List<DomainTreeNode> domainTreeNodePath = domainTree.recentKnownNode(entityTreeNode, nodeConstraintMap.keySet());
 
         // 将路径上所有实体查询都执行以getEntity() 以传播约束

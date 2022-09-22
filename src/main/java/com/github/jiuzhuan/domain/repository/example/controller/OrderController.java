@@ -31,13 +31,16 @@ public class OrderController {
 
     @GetMapping("getOrder")
     public List<Order> getOrder(@RequestParam("orderId") Integer orderId){
+        // TODO: 2022/9/23 补充测试用例
 //        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, orderId);
         orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, 2);
+//        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, 3);
         orderDomain.execute(Order.class);
-//        orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.get();
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(MasterOrderInfo.class);
         return orderDomain.get();
     }
 
