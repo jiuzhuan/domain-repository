@@ -2,6 +2,7 @@ package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
@@ -48,7 +49,13 @@ public class OrderController2 {
             for (SlaveOrderInfo slaveOrderInfo : slaveOrderMap.get(masterOrderInfo.getId())) {
                 SlaveOrder slaveOrder = new SlaveOrder();
                 slaveOrder.setSlaveOrderInfo(slaveOrderInfo);
-                slaveOrder.setOrderGoodInfo(orderGoodMap.get(slaveOrderInfo.getId()));
+                List<OrderGood> orderGoods = new ArrayList<>();
+                for (OrderGoodInfo orderGoodInfo : orderGoodMap.get(slaveOrderInfo.getId())) {
+                    OrderGood orderGood = new OrderGood();
+                    orderGood.setOrderGoodInfo(orderGoodInfo);
+                    orderGoods.add(orderGood);
+                }
+                slaveOrder.setOrderGood(orderGoods);
                 slaveOrder.setOrderGoodDiscountInfo(orderGoodDiscountMap.get(slaveOrderInfo.getId()));
                 slaveOrders.add(slaveOrder);
             }

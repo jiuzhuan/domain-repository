@@ -36,17 +36,24 @@ public class DomainTreeNode {
     public Class<?> parentDomClass;
 
     /**
+     * 所属的聚合的层次
+     */
+    public Integer parentDomClassLevel;
+
+    /**
      * 所在属性的属性名
      */
     public String fieldName;
 
 
-    public DomainTreeNode(Class<?> parentDomClass, Class<?> entityClass, DomainTreeNode parentNode, String entityJoinField, String parentJoinField, String fieldName) {
+    public DomainTreeNode(Integer parentDomClassLevel, Class<?> parentDomClass, Class<?> entityClass, DomainTreeNode parentNode,
+                          String entityJoinField, String parentJoinField, String fieldName) {
         this.parentDomClass = parentDomClass;
         this.entityClass = entityClass;
         this.parentNode = parentNode;
         this.entityJoinField = entityJoinField;
         this.parentJoinField = parentJoinField;
+        this.parentDomClassLevel = parentDomClassLevel;
         this.fieldName = fieldName;
     }
 }

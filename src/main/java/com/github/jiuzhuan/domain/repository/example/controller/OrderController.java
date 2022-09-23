@@ -36,6 +36,9 @@ public class OrderController {
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.get();
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
         // 顺序2
         orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodInfo.class).where();
@@ -44,6 +47,7 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
         return orderDomain.get();
     }
 

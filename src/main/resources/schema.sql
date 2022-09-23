@@ -23,6 +23,12 @@ CREATE TABLE order_good_info
     slave_order_info_id INT  comment 'slave_order_info.id',
     good_name           VARCHAR(30) comment 'good name'
 );
+CREATE TABLE order_good_remark_info
+(
+    id                  INT  AUTO_INCREMENT  PRIMARY KEY,
+    order_good_info_id INT  comment 'order_good_info.id',
+    remark           VARCHAR(30) comment 'remark'
+);
 CREATE TABLE order_good_discount_info
 (
     id                  INT AUTO_INCREMENT  PRIMARY KEY,
@@ -37,6 +43,7 @@ INSERT INTO order_address_info (id, master_order_info_id, address) values (1, 1,
 INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (1, 1, '麦当劳');
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (1, 1, '香辣鸡腿堡');
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (2, 1, '可乐');
+INSERT INTO order_good_remark_info (id, order_good_info_id, remark) values (1, 2, '加冰');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (1, 1, 0.8);
 
 INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (2, 1, '肯德基');

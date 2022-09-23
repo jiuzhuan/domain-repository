@@ -33,12 +33,12 @@ public class DomainTreeCache {
     private static DomainTree init(Class<?> domainClass) {
         DomainTree domainTree = new DomainTree();
         // 顶层第一个节点作为父节点
-        buildDomainTreeNode(domainClass, domainTree, domainClass, null);
+        buildDomainTreeNode(domainClass, domainTree, 0, domainClass, null);
         domainTreeMap.put(domainClass, domainTree);
         return domainTree;
     }
 
-    private static void buildDomainTreeNode(Class<?> domainClass, DomainTree domainTree, Class<?> parentDomainClass, DomainTreeNode parentNode) {
+    private static void buildDomainTreeNode(Class<?> domainClass, DomainTree domainTree, Integer level, Class<?> parentDomainClass, DomainTreeNode parentNode) {
         for (Field declaredField : domainClass.getDeclaredFields()) {
             // 没有JoinOn注解的忽略
             JoinOn joinOn = declaredField.getAnnotation(JoinOn.class);
@@ -55,7 +55,8 @@ public class DomainTreeCache {
                     continue;
                 }
                 // 创建子节点
-                DomainTreeNode currentNode = new DomainTreeNode(parentDomainClass, entityType, null, joinOn.joinField(), null, declaredField.getName());
+                DomainTreeNode currentNode = new DomainTreeNode(level, parentDomainClass, entityType, null,
+                        joinOn.joinField(), null, declaredField.getName());
 
                 // 没有父节点 那么第一个属性就作为父节点(约定)
                 if (parentNode == null) {
@@ -75,7 +76,8 @@ public class DomainTreeCache {
                 // 顺便为子聚合创建树缓存
                 get(entityType);
                 // 聚合 - 先创建聚合的父节点
-                DomainTreeNode currentNode = new DomainTreeNode(entityType, joinOn.joinEntity(), parentNode, null, joinOn.joinField(), null);
+                DomainTreeNode currentNode = new DomainTreeNode(level + 1, entityType, joinOn.joinEntity(),
+                        parentNode, null, joinOn.joinField(), null);
 
                 // 构建子节点属性
                 currentNode.parentNode = parentNode;
@@ -85,7 +87,7 @@ public class DomainTreeCache {
                 domainTree.entityNodeMap.put(joinOn.joinEntity(), currentNode);
 
                 // 加入下一层
-                buildDomainTreeNode(entityType, domainTree, entityType, currentNode);
+                buildDomainTreeNode(entityType, domainTree, level + 1, entityType, currentNode);
             }
         }
     }
