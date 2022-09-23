@@ -38,9 +38,8 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
     }
 
     @SneakyThrows
-    public <T> List<T> execute(Class<?> tClass) {
-        selectDomainThreadLocal.get().execute(tClass);
-        return selectDomainThreadLocal.get().get();
+    public void execute(Class<DomEntity> domClass) {
+        selectDomainThreadLocal.get().execute(domClass);
     }
 
     public <T> List<T> getEntity(Class<T> entityClass) {
@@ -48,8 +47,13 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
     }
 
     @Override
-    public <T> List<T> get() {
-        return this.selectDomainThreadLocal.get().get();
+    public <T> List<T> getDomains(Class<T> newDomClass) {
+        return this.selectDomainThreadLocal.get().getDomains(newDomClass);
+    }
+
+    @Override
+    public <T> List<T> getAutoDomains() {
+        return this.selectDomainThreadLocal.get().getAutoDomains();
     }
 
     /**

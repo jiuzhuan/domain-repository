@@ -1,6 +1,7 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
@@ -36,6 +37,7 @@ class OrderControllerTest {
 
         AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
         AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo);
+        AssertDefaultData.assertRemark1(orders.get(0).slaveOrder.get(0).orderGood.get(1).orderGoodRemarkInfo);
         AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGood.get(1).orderGoodInfo);
         AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
 
@@ -50,6 +52,15 @@ class OrderControllerTest {
         AssertDefaultData.assertSlave3(orders.get(1).slaveOrder.get(0).slaveOrderInfo);
         AssertDefaultData.assertGood4(orders.get(1).slaveOrder.get(0).orderGood.get(0).orderGoodInfo);
         AssertDefaultData.assertDiscount3(orders.get(1).slaveOrder.get(0).orderGoodDiscountInfo);
+    }
+
+    @Test
+    void getOrderGoods() {
+        List<OrderGood> orderGoods = orderController.getOrderGoods();
+
+        assert orderGoods.size() == 4;
+        AssertDefaultData.assertGood1(orderGoods.get(0).orderGoodInfo);
+        AssertDefaultData.assertGood2(orderGoods.get(1).orderGoodInfo);
     }
 
     @Test

@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -64,13 +65,11 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
     /**
      * 初始化查询
-     * @param tClass
-     * @return
      */
-    public Map<Class<?>, List<Object>> execute(Class tClass) {
+    public Map<Class<?>, List<Object>> execute(Class<DomEntity> domClass) {
 
         // 由于泛型擦除机制 所以只能在执行时传入泛型...
-        this.domClass = tClass;
+        this.domClass = domClass;
         this.domainTree = DomainTreeCache.get(domClass);
 
         // 执行sql
@@ -128,19 +127,29 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
     /**
      * 获取结构化的结果
-     * data -> domList, 未知节点的子节点虽然可以按parentJoinField分组, 但是自身无法分组(没有明确的值), 所以未知节点及以上无法结构化
+     * data -> domList
+     * 1. 未知节点的子节点虽然可以按parentJoinField分组, 但是自身无法分组(没有明确的值), 所以未知节点及以上无法结构化
+     * 2. 即使是已知节点 由于关联查询新实体时 新实体可能缺少数据(未关联上) 所以 可能会有部分实体无法分配到组(groupBy joinField) 这部分数据必须舍弃
+     * 3. 允许用户指定聚合类型 按指定的聚合类型结构化数据
      *
      * @return 结果
      * @param <T>
      */
     @SneakyThrows
-    public <T> List<T> get() {
+    public <T> List<T> getDomains(Class<T> newDomClass) {
 
         // 读缓存
-        if (domList != null) return (List<T>) domList;
+        if (domList != null && ReflectionUtil.getGenericType(domList).equals(newDomClass)) return (List<T>) domList;
 
-        //  结构化
-        // 寻找已知子树的最小聚合层
+        // 结构化
+        domList = setDomain(newDomClass);
+
+        return (List<T>) domList;
+    }
+
+    @SneakyThrows
+    public <T> List<T> getAutoDomains() {
+        // 结构化: 寻找已知子树的最小聚合
         Integer minLevel = Integer.MAX_VALUE;
         DomainTreeNode minLevelNode = null;
         for (Class<?> clearClass : data.keySet()) {
@@ -150,56 +159,41 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 minLevel = node.parentDomClassLevel;
             }
         }
-        // todo 已知子实体 关联查询父实体时 父实体可能缺少数据(未关联上) 所以 应当按初始化查询时得到的实体分组只聚合层 循环创建聚合实例并赋值
-        domList = setDomain(minLevelNode.parentDomClass, minLevelNode);
-
-        return (List<T>) domList;
+        return (List<T>) getDomains(minLevelNode.parentDomClass);
     }
 
-    public List<Object> setDomain(Class<?> parentDomClass, DomainTreeNode topNode){
-        // 解析聚合的属性结构 todo 缓存起来
-        Field topEntityField = parentDomClass.getDeclaredFields()[0];
-        List<Pair<Field, Class<?>>> domClassEntityFields = new ArrayList<>();
-        List<Pair<Field, Class<?>>> domClassDomainFields = new ArrayList<>();
+    public List<Object> setDomain(Class<?> parentDomClass){
+        // 解析聚合结构 并将数据分组
+        List<Triple<Field, Class<?>, Map<Object, List<Object>>>> entityGroups = new ArrayList<>();
         for (Field field : parentDomClass.getDeclaredFields()) {
             Class<?> genericType = ReflectionUtil.getGenericType(field);
-            if (Objects.equals(genericType, topNode.entityClass)) {
-                topEntityField = field;
-            } else if (genericType.isAnnotationPresent(Dom.class)) {
-                domClassDomainFields.add(Pair.of(field, genericType));
-            } else {
-                domClassEntityFields.add(Pair.of(field, genericType));
-            }
-        }
-        // 聚合的顶节点分组
-        List<Object> list = new ArrayList<>();
-        List<Object> topValues = data.get(topNode.entityClass);
-        if (topValues == null) return null;
-        Map<Object, List<Object>> topValuesMap = topValues.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, topNode.entityJoinField)));
-        // 创建聚合集合 并赋值
-        for (Map.Entry<Object, List<Object>> topValue : topValuesMap.entrySet()) {
-            Object domInstance = ClassReflection.newInstance(parentDomClass);
-            ClassReflection.setFieldValues(domInstance, topEntityField, Lists.newArrayList(topValue.getValue()));
-            // 聚合普通属性赋值(分组)
-            for (Pair<Field, Class<?>> domClassEntityField : domClassEntityFields) {
-                DomainTreeNode entityNode = domainTree.getNodeByEntity(domClassEntityField.getRight());
-                List<Object> subEntitys = data.get(domClassEntityField.getRight());
-                if (subEntitys == null) continue;
-                Map<Object, List<Object>> group = subEntitys.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
-                ClassReflection.setFieldValues(domInstance, domClassEntityField.getLeft(), group.get(topValue.getKey()));
-            }
-            // 聚合内子聚合递归处理(分组)
-            for (Pair<Field, Class<?>> domClassDomainField : domClassDomainFields) {
-                DomainTree subDomainTree = DomainTreeCache.get(domClassDomainField.getRight());
-                List<?> subDoms = setDomain(domClassDomainField.getRight(), subDomainTree.rootNode);
+            if (genericType.isAnnotationPresent(Dom.class)) {
+                DomainTree subDomainTree = DomainTreeCache.get(genericType);
+                List<?> subDoms = setDomain(genericType);
                 if (subDoms == null) continue;
                 DomainTreeNode subNode = domainTree.getNodeByEntity(subDomainTree.rootNode.entityClass);
-                Map<Object, List<Object>> subGroup = subDoms.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
-                ClassReflection.setFieldValues(domInstance, domClassDomainField.getLeft(), subGroup.get(topValue.getKey()));
+                Map<Object, List<Object>> group = subDoms.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
+                entityGroups.add(Triple.of(field, genericType, group));
+            } else {
+                DomainTreeNode entityNode = domainTree.getNodeByEntity(genericType);
+                List<Object> subEntitys = data.get(genericType);
+                if (subEntitys == null) continue;
+                Map<Object, List<Object>> group = subEntitys.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
+                entityGroups.add(Triple.of(field, genericType, group));
+            }
+        }
+        // 创建聚合集合 并赋值
+        List<Object> list = new ArrayList<>();
+        int domSize = entityGroups.stream().map(Triple::getRight).map(Map::size).max(Comparator.comparingInt(a -> a)).orElse(0);
+        Triple<Field, Class<?>, Map<Object, List<Object>>> standardFieldGroup = entityGroups.stream().filter(g -> Objects.equals(domSize, g.getRight().size())).findFirst().orElse(null);
+        if (standardFieldGroup == null) return null;
+        for (Map.Entry<Object, List<Object>> standard : standardFieldGroup.getRight().entrySet()) {
+            Object domInstance = ClassReflection.newInstance(parentDomClass);
+            for (Triple<Field, Class<?>, Map<Object, List<Object>>> entityGroup : entityGroups) {
+                ClassReflection.setFieldValues(domInstance, entityGroup.getLeft(), entityGroup.getRight().get(standard.getKey()));
             }
             list.add(domInstance);
         }
-
         return list;
     }
 

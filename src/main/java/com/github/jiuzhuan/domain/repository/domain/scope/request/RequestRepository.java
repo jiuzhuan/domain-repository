@@ -8,7 +8,20 @@ import java.util.List;
  */
 public interface RequestRepository<DomEntity> {
 
-    <T> List<T> get();
+    /**
+     * 将结果赋值到指定聚合类集合
+     * @param newDomClass
+     * @return
+     * @param <T>
+     */
+    <T> List<T> getDomains(Class<T> newDomClass);
+
+    /**
+     * 将结果赋值到最小聚合类集合
+     * @return
+     * @param <T>
+     */
+    <T> List<T> getAutoDomains();
 
     void clear();
 }

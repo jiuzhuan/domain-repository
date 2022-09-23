@@ -37,7 +37,6 @@ public class DomainFieldCache {
      */
     private static ConcurrentHashMap<String, Map<String, Map<String, List<Field>>>> classTableColumnMap = new ConcurrentHashMap<>();
 
-    // TODO: 2022/4/24 这一步可以放到spring容器启动完成监听事件中
     public static void init(Class<?> clazz) {
         Map<String, Map<String, List<Field>>> tableColumnMap = classTableColumnMap.get(clazz.getSimpleName());
         if (tableColumnMap == null) {

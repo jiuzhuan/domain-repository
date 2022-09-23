@@ -64,4 +64,8 @@ public class AssertDefaultData {
     public static void assertAddress1(OrderAddressInfo info) {
         assert Objects.equals(info.address, "上海");
     }
+
+    public static void assertRemark1(OrderGoodRemarkInfo info) {
+        assert Objects.equals(info.remark, "加冰");
+    }
 }
