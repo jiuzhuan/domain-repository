@@ -1,9 +1,10 @@
-package com.github.jiuzhuan.domain.repository.example.domain;
+package com.github.jiuzhuan.domain.repository.example.domain.agg;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderServiceInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import lombok.Data;
 
@@ -32,8 +33,8 @@ public class SlaveOrder {
     /**
      * 附加服务 运费险/保价险
      */
-//    @JoinOn(joinEntity = OrderGoodInfo.class, joinField = "slaveOrderInfoId")
-//    public List<OrderGood> orderGood;
+    @JoinOn(joinEntity = OrderServiceInfo.class, joinField = "slaveOrderInfoId")
+    public List<OrderService> orderService;
 
     /**
      * 优惠分摊实体

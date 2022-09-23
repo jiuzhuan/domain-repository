@@ -1,9 +1,9 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
-import com.github.jiuzhuan.domain.repository.example.domain.Order;
-import com.github.jiuzhuan.domain.repository.example.domain.OrderGood;
-import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;

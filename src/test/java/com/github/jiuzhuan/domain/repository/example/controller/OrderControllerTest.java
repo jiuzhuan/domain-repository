@@ -1,20 +1,13 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
-import com.github.jiuzhuan.domain.repository.example.domain.Order;
-import com.github.jiuzhuan.domain.repository.example.domain.OrderGood;
-import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +29,8 @@ class OrderControllerTest {
         AssertDefaultData.assertAddress1(orders.get(0).orderAddressInfo);
 
         AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertService1(orders.get(0).slaveOrder.get(0).orderService.get(0).orderServiceInfo);
+        AssertDefaultData.assertServicePrice1(orders.get(0).slaveOrder.get(0).orderService.get(0).orderServicePriceInfo);
         AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo);
         AssertDefaultData.assertRemark1(orders.get(0).slaveOrder.get(0).orderGood.get(1).orderGoodRemarkInfo);
         AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGood.get(1).orderGoodInfo);
@@ -130,5 +125,13 @@ class OrderControllerTest {
         AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
         AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo);
         assert (orders.get(0).slaveOrder.get(0).orderGood.size() == 1);
+    }
+
+    @Test
+    void getGoodByServiceId() {
+        List<SlaveOrder> slaveOrders = orderController.getGoodByServiceId(1);
+
+        AssertDefaultData.assertGood1(slaveOrders.get(0).orderGood.get(0).orderGoodInfo);
+        AssertDefaultData.assertService1(slaveOrders.get(0).orderService.get(0).orderServiceInfo);
     }
 }

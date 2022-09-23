@@ -17,6 +17,18 @@ CREATE TABLE slave_order_info
     master_order_info_id INT  comment 'master_order_info.id',
     store_name           VARCHAR(30) comment 'store name'
 );
+CREATE TABLE order_service_info
+(
+    id                  INT  AUTO_INCREMENT  PRIMARY KEY,
+    slave_order_info_id INT  comment 'slave_order_info.id',
+    service_name           VARCHAR(30) comment 'service name'
+);
+CREATE TABLE order_service_price_info
+(
+    id                  INT  AUTO_INCREMENT  PRIMARY KEY,
+    order_service_info_id INT  comment 'order_service_info.id',
+    price           DECIMAL(10,2) comment 'price'
+);
 CREATE TABLE order_good_info
 (
     id                  INT  AUTO_INCREMENT  PRIMARY KEY,
@@ -41,6 +53,8 @@ INSERT INTO master_order_info (id, user_name) values (1, '老王');
 INSERT INTO order_address_info (id, master_order_info_id, address) values (1, 1, '上海');
 
 INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (1, 1, '麦当劳');
+INSERT INTO order_service_info (id, slave_order_info_id, service_name) values (1, 1, '保价险');
+INSERT INTO order_service_price_info (id, order_service_info_id, price) values (1, 1, 99);
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (1, 1, '香辣鸡腿堡');
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (2, 1, '可乐');
 INSERT INTO order_good_remark_info (id, order_good_info_id, remark) values (1, 2, '加冰');

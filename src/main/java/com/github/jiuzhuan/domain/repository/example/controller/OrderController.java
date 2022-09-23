@@ -1,23 +1,16 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
-import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
-import com.github.jiuzhuan.domain.repository.example.domain.Order;
-import com.github.jiuzhuan.domain.repository.example.domain.OrderGood;
-import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author arrety
@@ -49,6 +42,8 @@ public class OrderController {
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderAddressInfo.class);
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
+        orderDomain.getEntity(OrderServiceInfo.class);
+        orderDomain.getEntity(OrderServicePriceInfo.class);
         return orderDomain.getAutoDomains();
     }
 
@@ -176,6 +171,16 @@ public class OrderController {
         orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
+        return orderDomain.getAutoDomains();
+    }
+
+    @GetMapping("getGoodByServiceId")
+    public List<SlaveOrder> getGoodByServiceId(@RequestParam("id") Integer id){
+        // TODO: 2022.09.24 索引不对 
+        orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getId, id);
+        orderDomain.execute(Order.class);
+        // // TODO: 2022.09.24  最小聚合不对
+        orderDomain.getEntity(OrderGoodInfo.class);
         return orderDomain.getAutoDomains();
     }
 }

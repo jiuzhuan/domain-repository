@@ -1,7 +1,5 @@
 package com.github.jiuzhuan.domain.repository.domain.selecter.tree;
 
-import com.github.jiuzhuan.domain.repository.example.domain.Order;
-
 import java.util.*;
 
 /**

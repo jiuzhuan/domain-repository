@@ -1,10 +1,7 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
-import com.github.jiuzhuan.domain.repository.example.domain.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
-import org.springframework.util.Assert;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -67,5 +64,13 @@ public class AssertDefaultData {
 
     public static void assertRemark1(OrderGoodRemarkInfo info) {
         assert Objects.equals(info.remark, "加冰");
+    }
+
+    public static void assertService1(OrderServiceInfo info) {
+        assert Objects.equals(info.serviceName, "保价险");
+    }
+
+    public static void assertServicePrice1(OrderServicePriceInfo info) {
+        assert Objects.equals(info.price.toString(), "99.00");
     }
 }

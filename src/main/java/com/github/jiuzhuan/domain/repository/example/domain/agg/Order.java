@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.example.domain;
+package com.github.jiuzhuan.domain.repository.example.domain.agg;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
