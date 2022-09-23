@@ -83,7 +83,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     private void setConstraint(Map<Class<?>, List<Object>> classListMap) {
-        // 无论自身约束还是父节点的约束  两者只要有一个有值 就不应该再次赋值(因为最先出现的是最干净的 第二次赋的值可能被其它实体过滤了)
+        // 无论自身约束还是父节点的约束  两者只要有一个有值 就不应该再次赋值(因为最先出现的是最干净的, 第二次赋的值可能被其它实体过滤了)
         for (Map.Entry<Class<?>, List<Object>> classListEntry : classListMap.entrySet()) {
 
             DomainTreeNode entityNode = domainTree.getNodeByEntity(classListEntry.getKey());
@@ -150,7 +150,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 minLevel = node.parentDomClassLevel;
             }
         }
-        // todo 已知子实体 关联查询父实体时 父实体可能缺少数据  所以 应当按data里最大分组创建聚合并赋值
+        // todo 已知子实体 关联查询父实体时 父实体可能缺少数据(未关联上) 所以 应当按初始化查询时得到的实体分组只聚合层 循环创建聚合实例并赋值
         domList = setDomain(minLevelNode.parentDomClass, minLevelNode);
 
         return (List<T>) domList;

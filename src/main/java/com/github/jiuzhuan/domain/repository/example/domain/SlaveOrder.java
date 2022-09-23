@@ -30,6 +30,12 @@ public class SlaveOrder {
     public List<OrderGood> orderGood;
 
     /**
+     * 附加服务 运费险/保价险
+     */
+//    @JoinOn(joinEntity = OrderGoodInfo.class, joinField = "slaveOrderInfoId")
+//    public List<OrderGood> orderGood;
+
+    /**
      * 优惠分摊实体
      */
     @JoinOn(joinEntity = OrderGoodDiscountInfo.class, joinField = "slaveOrderInfoId")
