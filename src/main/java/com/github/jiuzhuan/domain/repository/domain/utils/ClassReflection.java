@@ -24,6 +24,7 @@ public class ClassReflection {
      * 2. 属性list 值list 直接set
      */
     public static <T> void setFieldValues(T obj, Field field, List<Object> values) {
+        if (values == null) return;
         if (Objects.equals(field.getType(), List.class)) {
             ClassReflection.setFieldValue(obj, field, values);
         } else {

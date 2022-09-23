@@ -3,6 +3,7 @@ package com.github.jiuzhuan.domain.repository.example.domain;
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderAddressInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
 import lombok.Data;
 
@@ -21,6 +22,12 @@ public class Order {
      */
     @JoinOn(joinEntity = MasterOrderInfo.class, joinField = "id")
     public MasterOrderInfo masterOrderInfo;
+
+    /**
+     * 主单实体
+     */
+    @JoinOn(joinEntity = OrderAddressInfo.class, joinField = "masterOrderInfoId")
+    public OrderAddressInfo orderAddressInfo;
 
     /**
      * 子单聚合

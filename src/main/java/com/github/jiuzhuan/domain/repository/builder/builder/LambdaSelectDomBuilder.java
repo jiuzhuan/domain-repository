@@ -8,6 +8,8 @@ import com.github.jiuzhuan.domain.repository.domain.utils.DomainFieldUtil;
 import com.github.jiuzhuan.domain.repository.common.exception.ReflectionException;
 import com.github.jiuzhuan.domain.repository.builder.interfaces.Func;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
@@ -175,7 +177,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
                 for (Map.Entry<Class<?>, Object> entry : tableItemMap.entrySet()) {
                     List<Object> values = result.get(entry.getKey());
                     if (values == null) {
-                        result.put(entry.getKey(), Arrays.asList(entry.getValue()));
+                        result.put(entry.getKey(), Lists.newArrayList(entry.getValue()));
                     } else {
                         values.add(entry.getValue());
                     }

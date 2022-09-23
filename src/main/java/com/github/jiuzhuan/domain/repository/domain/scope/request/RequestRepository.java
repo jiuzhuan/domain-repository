@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface RequestRepository<DomEntity> {
 
-    List<DomEntity> get();
+    <T> List<T> get();
 
     void clear();
 }

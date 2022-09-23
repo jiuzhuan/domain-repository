@@ -58,20 +58,20 @@ public class DomainTree {
         List<DomainTreeNode> clearPath2root = new ArrayList<>();
         clearPath2root.add(clearTopNode);
         path2root(clearTopNode, clearPath2root);
-        // 找最小公顶点
+        // 找到最小公顶点, 得到经过最小公顶点的路径
         return minPublicNode(targetPath2root, clearPath2root);
     }
 
     private List<DomainTreeNode> minPublicNode(List<DomainTreeNode> targetPath2root, List<DomainTreeNode> clearPath2root) {
         int index = 0;
         for (int i = 0; i < targetPath2root.size() && i < clearPath2root.size(); i++) {
-            if (targetPath2root.get(i).hashCode() != clearPath2root.get(i).hashCode()) {
+            if (!Objects.equals(targetPath2root.get(i).hashCode(), clearPath2root.get(i).hashCode())) {
                 break;
             }
             index++;
         }
         List<DomainTreeNode> prePath = clearPath2root.subList(index, clearPath2root.size());
-        List<DomainTreeNode> postPath = targetPath2root.subList(index, targetPath2root.size());
+        List<DomainTreeNode> postPath = targetPath2root.subList(index - 1, targetPath2root.size());
         prePath.addAll(postPath);
         return prePath;
     }

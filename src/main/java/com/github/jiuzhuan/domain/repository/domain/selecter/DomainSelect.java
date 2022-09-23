@@ -8,6 +8,7 @@ import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCach
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
+import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -97,17 +98,25 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 if (subNode.parentJoinField == null) {
                     nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
                 } else {
+                    // 设置中间表的父约束
                     parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
                 }
             }
 
             // 设置对父节点的约束
+            List<Object> joinIds = selfJoinIds;
             if (entityNode.parentNode != null) {
                 if (entityNode.parentJoinField != null) {
                     List<Object> parentJoinIds = ClassReflection.getFieldValue(classListEntry.getValue(), entityNode.parentJoinField);
+                    joinIds = parentJoinIds;
                     nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>(parentJoinIds));
                 } else {
                     nodeConstraintMap.computeIfAbsent(entityNode.parentNode, k -> new HashSet<>(selfJoinIds));
+                }
+                // 设置同级节点约束
+                for (DomainTreeNode subNode : entityNode.parentNode.subNodes) {
+                    List<Object> finalJoinIds = joinIds;
+                    nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(finalJoinIds));
                 }
             }
         }
@@ -151,7 +160,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     public <T> List<T> setDomain(Class<T> domClass, DomainTreeNode topNode){
-        // 非聚合的实体
+        // 解析聚合的属性结构 todo 缓存起来
         Field topEntityField = domClass.getDeclaredFields()[0];
         List<Pair<Field, Class<?>>> domClassEntityFields = new ArrayList<>();
         List<Pair<Field, Class<?>>> domClassDomainFields = new ArrayList<>();
@@ -165,27 +174,31 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 domClassEntityFields.add(Pair.of(field, genericType));
             }
         }
+        // 聚合的顶节点分组
         List<T> list = new ArrayList<>();
         List<Object> topValues = data.get(topNode.entityClass);
         if (topValues == null) return null;
-        for (Object topValue : topValues) {
+        Map<Object, List<Object>> topValuesMap = topValues.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, topNode.entityJoinField)));
+        // 创建聚合集合 并赋值
+        for (Map.Entry<Object, List<Object>> topValue : topValuesMap.entrySet()) {
             T domInstance = ClassReflection.newInstance(domClass);
-            ClassReflection.setFieldValues(domInstance, topEntityField, Arrays.asList(topValue));
-            Object id = ClassReflection.getFieldValue(topValue, topNode.entityJoinField);
+            ClassReflection.setFieldValues(domInstance, topEntityField, Lists.newArrayList(topValue.getValue()));
+            // 聚合普通属性赋值(分组)
             for (Pair<Field, Class<?>> domClassEntityField : domClassEntityFields) {
                 DomainTreeNode entityNode = domainTree.getNodeByEntity(domClassEntityField.getRight());
                 List<Object> subEntitys = data.get(domClassEntityField.getRight());
                 if (subEntitys == null) continue;
                 Map<Object, List<Object>> group = subEntitys.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
-                ClassReflection.setFieldValues(domInstance, domClassEntityField.getLeft(), group.get(id));
+                ClassReflection.setFieldValues(domInstance, domClassEntityField.getLeft(), group.get(topValue.getKey()));
             }
+            // 聚合内子聚合递归处理(分组)
             for (Pair<Field, Class<?>> domClassDomainField : domClassDomainFields) {
                 DomainTree subDomainTree = DomainTreeCache.get(domClassDomainField.getRight());
                 List<?> subDoms = setDomain(domClassDomainField.getRight(), subDomainTree.rootNode);
                 if (subDoms == null) continue;
                 DomainTreeNode subNode = domainTree.getNodeByEntity(subDomainTree.rootNode.entityClass);
                 Map<Object, List<Object>> subGroup = subDoms.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
-                ClassReflection.setFieldValues(domInstance, domClassDomainField.getLeft(), subGroup.get(id));
+                ClassReflection.setFieldValues(domInstance, domClassDomainField.getLeft(), subGroup.get(topValue.getKey()));
             }
             list.add(domInstance);
         }
@@ -242,7 +255,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         setConstraint(current);
         data.putAll(current);
 
-        // 清缓存
+        // 清缓存 - 以便于重新结构化聚合
         domList = null;
         return items;
     }

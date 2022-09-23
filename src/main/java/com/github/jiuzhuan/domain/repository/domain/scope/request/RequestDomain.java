@@ -38,7 +38,7 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
     }
 
     @SneakyThrows
-    public <T> List<T> execute(Class<T> tClass) {
+    public <T> List<T> execute(Class<?> tClass) {
         selectDomainThreadLocal.get().execute(tClass);
         return selectDomainThreadLocal.get().get();
     }
@@ -48,7 +48,7 @@ public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
     }
 
     @Override
-    public List<DomEntity> get() {
+    public <T> List<T> get() {
         return this.selectDomainThreadLocal.get().get();
     }
 

@@ -1,21 +1,26 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.example.domain.Order;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.jupiter.api.DisplayName;
+import com.github.jiuzhuan.domain.repository.example.domain.SlaveOrder;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author pengfwang@trip.com
- * @date 2022/8/31 23:01
+ * @date 2022/9/23 14:48
  */
 @SpringBootTest
 class OrderControllerTest {
@@ -24,25 +29,96 @@ class OrderControllerTest {
     OrderController orderController;
 
     @Test
-    @DisplayName("Should return the order when the ordergoodinfoid is not null")
-    void getOrder2WhenOrderGoodInfoIdIsNotNullThenReturnOrder() {
+    void getOrders() {
+        List<Order> orders = orderController.getOrders();
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+        AssertDefaultData.assertAddress1(orders.get(0).orderAddressInfo);
+
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(1));
+        AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
+
+        AssertDefaultData.assertSlave2(orders.get(0).slaveOrder.get(1).slaveOrderInfo);
+        AssertDefaultData.assertGood3(orders.get(0).slaveOrder.get(1).orderGoodInfo.get(0));
+        AssertDefaultData.assertDiscount2(orders.get(0).slaveOrder.get(1).orderGoodDiscountInfo);
+
+
+        AssertDefaultData.assertOrder2(orders.get(1).masterOrderInfo);
+        assertNull(orders.get(1).orderAddressInfo);
+
+        AssertDefaultData.assertSlave3(orders.get(1).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood4(orders.get(1).slaveOrder.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertDiscount3(orders.get(1).slaveOrder.get(0).orderGoodDiscountInfo);
+    }
+
+    @Test
+    void getOrderByOrderId() {
+        List<Order> orders = orderController.getOrderByOrderId(1);
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(1));
+        AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
+
+        AssertDefaultData.assertSlave2(orders.get(0).slaveOrder.get(1).slaveOrderInfo);
+        AssertDefaultData.assertGood3(orders.get(0).slaveOrder.get(1).orderGoodInfo.get(0));
+        AssertDefaultData.assertDiscount2(orders.get(0).slaveOrder.get(1).orderGoodDiscountInfo);
+    }
+
+    @Test
+    void getOrderBySlaveOrderInfoId() {
+        List<Order> orders = orderController.getOrderBySlaveOrderInfoId(1);
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(1));
+        AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
+    }
+
+    @Test
+    void getOrderByOrderGoodInfoId() {
         List<Order> orders = orderController.getOrderByOrderGoodInfoId(1);
-        Assert.notEmpty(orders, "The order is empty");
-        Assert.isTrue(CollectionUtils.isNotEmpty(orders), "The order is empty");
-        assertNotNull(orders);
-        assertTrue(CollectionUtils.isNotEmpty(orders));
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        assert (orders.get(0).slaveOrder.get(0).orderGoodInfo.size() == 1);
+        AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
     }
 
     @Test
-    @DisplayName("Should return the orders when the ordergoodinfoid is null")
-    void getOrder2WhenOrderGoodInfoIdIsNullThenReturnOrders() {
-        List<Order> orders = orderController.getOrderBySlaveOrderInfoId(null);
-        Assert.isTrue(CollectionUtils.isNotEmpty(orders), "The orders should not be empty");
+    void getOrderByOrderGoodDiscountInfoId() {
+        List<Order> orders = orderController.getOrderByOrderGoodDiscountInfoId(1);
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertGood2(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(1));
+        AssertDefaultData.assertDiscount1(orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo);
     }
 
     @Test
-    void getOrder() {
-        List<Order> orders = orderController.getOrder(1);
-        assertNotNull(orders);
+    void getGoodByDiscountId() {
+        List<SlaveOrder> slaveOrders = orderController.getGoodByDiscountId(1);
+
+        assert (slaveOrders.get(0).slaveOrderInfo == null);
+        AssertDefaultData.assertGood1(slaveOrders.get(0).orderGoodInfo.get(0));
+        AssertDefaultData.assertGood2(slaveOrders.get(0).orderGoodInfo.get(1));
+        AssertDefaultData.assertDiscount1(slaveOrders.get(0).orderGoodDiscountInfo);
+    }
+
+    @Test
+    void getMasterByGoodId() {
+        List<Order> orders = orderController.getMasterByGoodId(1);
+
+        AssertDefaultData.assertOrder1(orders.get(0).masterOrderInfo);
+        AssertDefaultData.assertSlave1(orders.get(0).slaveOrder.get(0).slaveOrderInfo);
+        AssertDefaultData.assertGood1(orders.get(0).slaveOrder.get(0).orderGoodInfo.get(0));
+        assert (orders.get(0).slaveOrder.get(0).orderGoodInfo.size() == 1);
     }
 }
