@@ -16,18 +16,20 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 聚合关联
+ * 聚合仓库
  *
  * @author arrety
  * @date 2022/4/10 16:40
  */
 @Component
+//@Scope(WebApplicationContext.SCOPE_REQUEST)
 @Scope("prototype")
 public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements DomainRepository{
 
@@ -115,7 +117,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 // 设置同级节点约束
                 for (DomainTreeNode subNode : entityNode.parentNode.subNodes) {
                     List<Object> finalJoinIds = joinIds;
-                    if (entityNode.parentJoinField != null) {
+                    if (subNode.parentJoinField == null) {
                         if (!parentNodeConstraintMap.containsKey(subNode)) nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(finalJoinIds));
                     } else {
                         if (!nodeConstraintMap.containsKey(subNode)) parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(finalJoinIds));
@@ -154,7 +156,13 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         DomainTreeNode minLevelNode = null;
         for (Class<?> clearClass : data.keySet()) {
             DomainTreeNode node = domainTree.getNodeByEntity(clearClass);
-            if (node.parentDomClassLevel.compareTo(minLevel) < 0) {
+            // 两个节点层级相等时  取其中某节点父节点所在聚合 (不必担心两个节点的父节点不一样 因为已知节点必然是相连的)
+            int compareTo = node.parentDomClassLevel.compareTo(minLevel);
+            if (compareTo == 0) {
+                DomainTreeNode tempNode = Optional.ofNullable(node.parentNode).orElse(minLevelNode.parentNode);
+                minLevelNode = tempNode ;
+                minLevel = tempNode.parentDomClassLevel;
+            } else if (compareTo < 0){
                 minLevelNode = node;
                 minLevel = node.parentDomClassLevel;
             }

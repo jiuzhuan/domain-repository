@@ -5,6 +5,7 @@ import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
+import com.github.jiuzhuan.domain.repository.example.svc.OrderSvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,9 @@ import java.util.List;
  */
 @RestController
 public class OrderController {
+
+    @Autowired
+    OrderSvc orderSvc;
 
     @Autowired
     OrderDomain orderDomain;
@@ -34,7 +38,6 @@ public class OrderController {
         orderDomain.getAutoDomains();
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodInfo.class).where();
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
@@ -44,6 +47,7 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
+        orderSvc.checkOrders();
         return orderDomain.getAutoDomains();
     }
 
@@ -59,7 +63,6 @@ public class OrderController {
         orderDomain.getAutoDomains();
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodInfo.class).where();
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
@@ -80,7 +83,6 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodInfo.class);
@@ -99,7 +101,6 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
@@ -117,14 +118,12 @@ public class OrderController {
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         // 顺序3
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
@@ -142,14 +141,12 @@ public class OrderController {
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         // 顺序2
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodDiscountInfo.class).where().eq(OrderGoodDiscountInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         // 顺序3
-        orderDomain.clear();
         orderDomain.selectAll().from(OrderGoodDiscountInfo.class).where().eq(OrderGoodDiscountInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodInfo.class);
@@ -176,10 +173,8 @@ public class OrderController {
 
     @GetMapping("getGoodByServiceId")
     public List<SlaveOrder> getGoodByServiceId(@RequestParam("id") Integer id){
-        // TODO: 2022.09.24 索引不对 
         orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getId, id);
         orderDomain.execute(Order.class);
-        // // TODO: 2022.09.24  最小聚合不对
         orderDomain.getEntity(OrderGoodInfo.class);
         return orderDomain.getAutoDomains();
     }

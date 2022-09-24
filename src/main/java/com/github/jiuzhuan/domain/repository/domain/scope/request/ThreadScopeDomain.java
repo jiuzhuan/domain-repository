@@ -11,12 +11,15 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 线程级生命周期的领域
+ * 仓库作用域代理(线程)
+ * 由于业务类中通过@Autowired注入DomainSelect, 即使DomainSelect作用域为原型或请求级, 也只会在依赖注入阶段创建一次, 所以永远是单例的
+ * 想要通过@Autowired注入 又能实现请求级 就要创建代理类 在每次调用时重新从Spring容器中getBean()创建一个目标类
+ * 线程级作用域的领域 并发时 会互相影响, fixme: 增加restful请求级作用域 参考Spring request作用域实现 @Scope(WebApplicationContext.SCOPE_REQUEST)
  * @author arrety
- * @date 2022/4/19 14:31 仓库
+ * @date 2022/4/19 14:31
  */
 @Component
-public class RequestDomain<DomEntity> implements RequestRepository<DomEntity> {
+public class ThreadScopeDomain<DomEntity> implements DomainRepository<DomEntity> {
 
     @Autowired
     private ApplicationContext applicationContext;
