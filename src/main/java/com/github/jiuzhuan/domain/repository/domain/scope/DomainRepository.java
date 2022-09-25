@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.domain.scope.request;
+package com.github.jiuzhuan.domain.repository.domain.scope;
 
 import java.util.List;
 

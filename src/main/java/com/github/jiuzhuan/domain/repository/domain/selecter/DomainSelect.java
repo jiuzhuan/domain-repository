@@ -95,12 +95,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
             // 设置对子节点的约束
             for (DomainTreeNode subNode : entityNode.subNodes) {
-                if (subNode.parentJoinField == null) {
-                    if (!parentNodeConstraintMap.containsKey(subNode)) nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
-                } else {
-                    // 设置中间表的父约束
-                    if (!nodeConstraintMap.containsKey(subNode)) parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
-                }
+                setSubNodeConstraint(selfJoinIds, subNode);
             }
 
             // 设置对父节点的约束
@@ -117,13 +112,18 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 // 设置同级节点约束
                 for (DomainTreeNode subNode : entityNode.parentNode.subNodes) {
                     List<Object> finalJoinIds = joinIds;
-                    if (subNode.parentJoinField == null) {
-                        if (!parentNodeConstraintMap.containsKey(subNode)) nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(finalJoinIds));
-                    } else {
-                        if (!nodeConstraintMap.containsKey(subNode)) parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(finalJoinIds));
-                    }
+                    setSubNodeConstraint(finalJoinIds, subNode);
                 }
             }
+        }
+    }
+
+    private void setSubNodeConstraint(List<Object> selfJoinIds, DomainTreeNode subNode) {
+        if (subNode.parentJoinField == null) {
+            if (!parentNodeConstraintMap.containsKey(subNode)) nodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
+        } else {
+            // 设置中间表的父约束
+            if (!nodeConstraintMap.containsKey(subNode)) parentNodeConstraintMap.computeIfAbsent(subNode, k -> new HashSet<>(selfJoinIds));
         }
     }
 
@@ -152,21 +152,23 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     @SneakyThrows
     public <T> List<T> getAutoDomains() {
         // 结构化: 寻找已知子树的最小聚合
-        Integer minLevel = Integer.MAX_VALUE;
         DomainTreeNode minLevelNode = null;
         for (Class<?> clearClass : data.keySet()) {
             DomainTreeNode node = domainTree.getNodeByEntity(clearClass);
+            if (minLevelNode == null) {
+                minLevelNode = node;
+                continue;
+            }
             // 两个节点层级相等时  取其中某节点父节点所在聚合 (不必担心两个节点的父节点不一样 因为已知节点必然是相连的)
-            int compareTo = node.parentDomClassLevel.compareTo(minLevel);
-            if (compareTo == 0) {
-                DomainTreeNode tempNode = Optional.ofNullable(node.parentNode).orElse(minLevelNode.parentNode);
-                minLevelNode = tempNode ;
-                minLevel = tempNode.parentDomClassLevel;
+            // 但是有一种例外 就是其中一个节点是中间表(isLeaf) 此时取其中任一节点所在聚合
+            int compareTo = node.parentDomClassLevel.compareTo(minLevelNode.parentDomClassLevel);
+            if (compareTo == 0 && (!node.isLeaf || !minLevelNode.isLeaf)) {
+                minLevelNode = node.parentNode != null ? node.parentNode : minLevelNode.parentNode;
             } else if (compareTo < 0){
                 minLevelNode = node;
-                minLevel = node.parentDomClassLevel;
             }
         }
+        if (minLevelNode == null) return null;
         return (List<T>) getDomains(minLevelNode.parentDomClass);
     }
 

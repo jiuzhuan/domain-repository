@@ -41,19 +41,25 @@ public class DomainTreeNode {
     public Integer parentDomClassLevel;
 
     /**
+     * 是否叶子节点
+     */
+    public Boolean isLeaf;
+
+    /**
      * 所在属性的属性名
      */
     public String fieldName;
 
 
     public DomainTreeNode(Integer parentDomClassLevel, Class<?> parentDomClass, Class<?> entityClass, DomainTreeNode parentNode,
-                          String entityJoinField, String parentJoinField, String fieldName) {
+                          String entityJoinField, String parentJoinField, Boolean isLeaf, String fieldName) {
         this.parentDomClass = parentDomClass;
         this.entityClass = entityClass;
         this.parentNode = parentNode;
         this.entityJoinField = entityJoinField;
         this.parentJoinField = parentJoinField;
         this.parentDomClassLevel = parentDomClassLevel;
+        this.isLeaf = isLeaf;
         this.fieldName = fieldName;
     }
 }

@@ -19,6 +19,8 @@ public interface SFunction<T, R> extends Function<T, R>, Serializable {
     /**
      * 获取SerializedLambda实例
      * 凡是继承了Serializable的函数式接口的实例会存在一个名字为writeReplace的方法，可以获取一个属于它的SerializedLambda实例，并且通过它获取到方法名、类名、参数、方法签名等
+     * 也可以像lombok一样, 在编译阶段(java文件->class字节码), 修改语法树, 给值加上属性名前缀, 获取的时候按符号分割, 前面是列名 后面是值,
+     * 然后再生成class字节码 (后续还有JIT即时编译器)
      *
      * @return SerializedLambda
      */

@@ -7,6 +7,7 @@ import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 领域聚合结构缓存
@@ -22,12 +23,11 @@ public class DomainTreeCache {
     private static final Map<Class<?>, DomainTree> domainTreeMap = new HashMap<>();
 
     public static DomainTree get(Class<?> domainClass) {
-        DomainTree tree = domainTreeMap.get(domainClass);
-        // todo 并发 双重检查锁
-        if (tree == null) {
+        DomainTree domainTree = domainTreeMap.get(domainClass);
+        if (domainTree == null) {
             return init(domainClass);
         }
-        return tree;
+        return domainTree;
     }
 
     private static DomainTree init(Class<?> domainClass) {
@@ -56,7 +56,7 @@ public class DomainTreeCache {
                 }
                 // 创建子节点
                 DomainTreeNode currentNode = new DomainTreeNode(level, parentDomainClass, entityType, null,
-                        joinOn.joinField(), null, declaredField.getName());
+                        joinOn.joinField(), null, true, declaredField.getName());
 
                 // 没有父节点 那么第一个属性就作为父节点(约定)
                 if (parentNode == null) {
@@ -77,7 +77,7 @@ public class DomainTreeCache {
                 get(entityType);
                 // 聚合 - 先创建聚合的父节点
                 DomainTreeNode currentNode = new DomainTreeNode(level + 1, entityType, joinOn.joinEntity(),
-                        parentNode, null, joinOn.joinField(), null);
+                        parentNode, null, joinOn.joinField(), false, null);
 
                 // 构建子节点属性
                 currentNode.parentNode = parentNode;
