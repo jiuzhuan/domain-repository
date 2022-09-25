@@ -233,6 +233,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
         // 将路径上所有实体查询都执行以getEntity() 以传播约束
         for (DomainTreeNode domainTreeNode : domainTreeNodePath) {
+            // TODO: 2022.09.25 递归会重复获取最短路径 改为循环getItem?
             items = (List<T>) getEntity(domainTreeNode.entityClass);
         }
         return items;

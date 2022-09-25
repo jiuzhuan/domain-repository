@@ -24,7 +24,7 @@ public class Order {
     public MasterOrderInfo masterOrderInfo;
 
     /**
-     * 主单实体
+     * 收货地址实体
      */
     @JoinOn(joinEntity = OrderAddressInfo.class, joinField = "masterOrderInfoId")
     public OrderAddressInfo orderAddressInfo;

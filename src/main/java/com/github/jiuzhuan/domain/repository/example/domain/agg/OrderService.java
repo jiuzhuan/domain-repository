@@ -17,13 +17,13 @@ import lombok.Data;
 public class OrderService {
 
     /**
-     * 商品实体
+     * 订单服务实体
      */
     @JoinOn(joinEntity = OrderServiceInfo.class, joinField = "id")
     public OrderServiceInfo orderServiceInfo;
 
     /**
-     * 商品备注实体
+     * 服务价格实体
      */
     @JoinOn(joinEntity = OrderServicePriceInfo.class, joinField = "orderServiceInfoId")
     public OrderServicePriceInfo orderServicePriceInfo;

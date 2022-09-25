@@ -12,7 +12,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 线程级作用域  有一定几率测试失败  因为属性值互相干扰
  * @author pengfwang@trip.com
  * @date 2022/9/23 14:48
  */
@@ -22,7 +21,6 @@ class OrderControllerTest {
     @Autowired
     OrderController orderController;
 
-    /* 线程级作用域  有一定几率测试失败  因为属性值互相干扰 */
     @Test
     void getOrders() {
         List<Order> orders = orderController.getOrders();
