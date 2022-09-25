@@ -1,5 +1,7 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
+import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
+import com.github.jiuzhuan.domain.repository.builder.builder.LambdaUpdateBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
@@ -7,6 +9,7 @@ import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import com.github.jiuzhuan.domain.repository.example.svc.OrderSvc;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +28,9 @@ public class OrderController {
 
     @Autowired
     OrderDomain orderDomain;
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @GetMapping("getOrders")
     public List<Order> getOrders(){
@@ -176,6 +182,19 @@ public class OrderController {
         orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodInfo.class);
+        return orderDomain.getAutoDomains();
+    }
+
+    @GetMapping("updateOrderBySlaveId")
+    public List<Order> updateOrderBySlaveId(@RequestParam("id") Integer id, @RequestParam("userName") String userName, @RequestParam("storeName") String storeName){
+//        LambdaUpdateBuilder updateBuilder = (LambdaUpdateBuilder)applicationContext.getBean("lambdaUpdateBuilder");
+        LambdaBuilder.update(MasterOrderInfo.class).leftJoin(SlaveOrderInfo.class).on(MasterOrderInfo::getId, SlaveOrderInfo::getMasterOrderInfoId)
+                .set(MasterOrderInfo::getUserName, userName)
+                .set(SlaveOrderInfo::getStoreName, storeName)
+                .where().eq(MasterOrderInfo::getId, id).update();
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
         return orderDomain.getAutoDomains();
     }
 }

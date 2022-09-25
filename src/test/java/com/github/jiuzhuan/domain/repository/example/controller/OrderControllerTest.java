@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -134,5 +135,15 @@ class OrderControllerTest {
         AssertDefaultData.assertGood1(slaveOrders.get(0).orderGood.get(0).orderGoodInfo);
         AssertDefaultData.assertGood2(slaveOrders.get(0).orderGood.get(1).orderGoodInfo);
         AssertDefaultData.assertService1(slaveOrders.get(0).orderService.get(0).orderServiceInfo);
+    }
+
+    @Test
+    void updateOrderBySlaveId() {
+        String userName = "小李-update-1";
+        String storeName = "老乡鸡-update-1";
+        List<Order> orders = orderController.updateOrderBySlaveId(3, userName, storeName);
+
+        assert Objects.equals(orders.get(0).masterOrderInfo.userName, userName);
+        assert Objects.equals(orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName, storeName);
     }
 }

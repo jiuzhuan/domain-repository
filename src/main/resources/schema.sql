@@ -69,3 +69,10 @@ INSERT INTO master_order_info (id, user_name) values (2, '小李');
 INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (3, 2, '老乡鸡');
 INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (4, 3, '鸡汤');
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (3, 3, 0.7);
+
+
+INSERT INTO master_order_info (id, user_name) values (3, '小李-update');
+
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 4, '老乡鸡-update');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 4, '鸡汤-update');
+INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (4, 4, 0.7);
