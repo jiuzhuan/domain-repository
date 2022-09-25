@@ -221,7 +221,6 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
         // 获取实体对应的字段, 如果实体在子聚合里则获取对应的子聚合
         DomainTreeNode entityTreeNode = domainTree.getNodeByEntity(entityClass);
-
         // 如果本层有约束(自身约束或父约束) 则直接执行sql查询
         HashSet<Object> constraints = nodeConstraintMap.get(entityTreeNode);
         if (constraints != null) return getItem(entityClass, entityTreeNode.entityJoinField, constraints);
@@ -229,6 +228,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         if (constraints != null) return getItem(entityClass, entityTreeNode.parentJoinField, constraints);
 
         // 向上下同时搜寻最近的有约束的层 并返回最短路径(包含当前要查询的类)
+        if (nodeConstraintMap.isEmpty()) return null;
         List<DomainTreeNode> domainTreeNodePath = domainTree.recentKnownNode(entityTreeNode, nodeConstraintMap.keySet());
 
         // 将路径上所有实体查询都执行以getEntity() 以传播约束

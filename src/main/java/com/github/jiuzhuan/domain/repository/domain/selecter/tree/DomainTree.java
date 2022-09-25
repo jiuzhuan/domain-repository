@@ -48,11 +48,9 @@ public class DomainTree {
         targetPath2root.add(targetNode);
         path2root(targetNode, targetPath2root);
         // 已知节点到根节点的路径 已知节点必然是互相连接的  所以可以用第一个节点往上找直到未知节点
-        DomainTreeNode clearTopNode = null;
-        Iterator<DomainTreeNode> clearNodesIterator = clearNodes.iterator();
-        while (clearNodesIterator.hasNext()) {
-            DomainTreeNode next = clearNodesIterator.next();
-            if (!clearNodes.contains(next.parentNode)) clearTopNode = next;
+        DomainTreeNode clearTopNode = clearNodes.stream().findFirst().orElseThrow();
+        for (DomainTreeNode clearNode : clearNodes) {
+            if (!clearNodes.contains(clearNode.parentNode)) clearTopNode = clearNode;
         }
         List<DomainTreeNode> clearPath2root = new ArrayList<>();
         clearPath2root.add(clearTopNode);
