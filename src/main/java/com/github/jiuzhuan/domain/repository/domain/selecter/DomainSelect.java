@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * 聚合仓库
+ * 1. 可以直接使用, 也可以通过DomainRepository代理使用, 以获取作用域的管理
  *
  * @author arrety
  * @date 2022/4/10 16:40
@@ -128,7 +129,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     /**
-     * 获取结构化的结果
+     * 获取结构化的结果 (投影)
      * data -> domList
      * 1. 未知节点的子节点虽然可以按parentJoinField分组, 但是自身无法分组(没有明确的值), 所以未知节点及以上无法结构化
      * 2. 即使是已知节点 由于关联查询新实体时 新实体可能缺少数据(未关联上) 所以 可能会有部分实体无法分配到组(groupBy joinField) 这部分数据必须舍弃
@@ -208,7 +209,10 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     /**
-     * 关联查询实体
+     * 关联查询实体, 特点:
+     * 1. 方法本身返回实体集合, 并且会注入到聚合
+     * 2. 每次调用时才进行关联查询
+     * 3. 自由组合不同实体, 比起JPA Entity Graph更灵活方便 (不需要定义各种概念)
      * @param entityClass
      * @return
      * @param <T>

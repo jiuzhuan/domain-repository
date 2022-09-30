@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 /**
  * 约束, 等同于 sql 中的 join on 字段
+ * // TODO: 2022/9/30 一个表通过两个不同字段关联两个不同表
  * @author arrety
  * @date 2022/3/29 20:24
  */
