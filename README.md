@@ -215,4 +215,5 @@ public class GetOrderApi2 {
 7. 缓存 (增加性能卖点, 考虑spring Cache)
 8. 保存 (难点1:判断新增or更新or删除 难点2:关联字段自动赋值)
 9. Spring data 全系列看完了, 实体属性内含有别的实体, 结构不好, 结果虽然可以映射到聚合, 但是动态获取结果还要定义EntityGraph
+10. gitee同步推送到github
 
