@@ -36,13 +36,14 @@ public abstract class AbstractLambdaBuilder<Builder> {
         return sql.toString();
     }
 
-    protected void firstSet() {
-        firstSet(sql);
+    protected void firstSet(boolean isSet) {
+        firstSet(sql, isSet);
     }
 
-    protected void firstSet(StringBuilder fff) {
+    protected void firstSet(StringBuilder fff, boolean isSet) {
         if (firstSet) {
             firstSet = false;
+            if (isSet) fff.append("set");
         } else {
             fff.append(" , ");
         }

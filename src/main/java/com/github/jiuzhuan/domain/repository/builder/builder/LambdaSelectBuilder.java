@@ -44,7 +44,7 @@ public class LambdaSelectBuilder extends AbstractWhereLambdaBuilder<LambdaSelect
             String columnName = getColumn(column);
             columnStrings.add(columnName);
         }
-        firstSet();
+        firstSet(false);
         sql.append(Joiner.on(", ").join(columnStrings));
         return builder;
     }
@@ -52,7 +52,7 @@ public class LambdaSelectBuilder extends AbstractWhereLambdaBuilder<LambdaSelect
     public LambdaSelectBuilder selectAll() {
         clear();
         sql.append(" * ");
-        firstSet();
+        firstSet(false);
         return builder;
     }
 

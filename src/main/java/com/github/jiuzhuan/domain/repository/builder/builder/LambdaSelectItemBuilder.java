@@ -101,7 +101,7 @@ public class LambdaSelectItemBuilder extends LambdaSelectBuilder {
             sql.append("*");
         } else {
             for (String columnName : selects) {
-                firstSet(sql);
+                firstSet(sql, false);
                 sql.append(columnName);
             }
         }

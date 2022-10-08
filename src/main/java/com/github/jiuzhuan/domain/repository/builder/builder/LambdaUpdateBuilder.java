@@ -23,7 +23,7 @@ public class LambdaUpdateBuilder extends AbstractWhereLambdaBuilder<LambdaUpdate
      */
     public final <T> LambdaUpdateBuilder update(Class<T> clazz) {
         String tableName = PropertyNamer.toUnderline(clazz.getSimpleName());
-        sql.append("update").append(tableName).append("set");
+        sql.append("update").append(tableName);
         adapter.resolveDatabase(clazz);
         return this;
     }
@@ -31,7 +31,7 @@ public class LambdaUpdateBuilder extends AbstractWhereLambdaBuilder<LambdaUpdate
 
     @Override
     public LambdaUpdateBuilder appendSet(String filed, Object value) {
-        firstSet();
+        firstSet(false);
         sql.append(filed)
                 .append(SqlKeyword.EQ.getSqlSegment())
                 .append("?");

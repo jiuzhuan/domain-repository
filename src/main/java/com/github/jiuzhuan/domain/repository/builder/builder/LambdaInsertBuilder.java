@@ -31,7 +31,7 @@ public class LambdaInsertBuilder extends AbstractLambdaBuilder<LambdaInsertBuild
      */
     public final <T> LambdaInsertBuilder insertInto(Class<T> clazz) {
         String tableName = PropertyNamer.toUnderline(clazz.getSimpleName());
-        sql.append("insert into").append(tableName).append("set");
+        sql.append("insert into").append(tableName);
         adapter.resolveDatabase(clazz);
         return this;
     }
@@ -40,7 +40,7 @@ public class LambdaInsertBuilder extends AbstractLambdaBuilder<LambdaInsertBuild
     @Override
     public LambdaInsertBuilder appendSet(String fieldName, Object value) {
         // 保存update语句
-        firstSet(nestedSql);
+        firstSet(nestedSql, true);
         nestedSql.append(fieldName)
                 .append(SqlKeyword.EQ.getSqlSegment())
                 .append(" ? ");

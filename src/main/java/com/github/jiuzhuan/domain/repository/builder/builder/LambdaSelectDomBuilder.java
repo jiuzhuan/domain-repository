@@ -98,7 +98,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
             Triple<String, String, Integer> tableAndColumn = getTableAndColumn(column);
             columnStrings.add(tableAndColumn.getLeft() + ASFLAG + tableAndColumn.getMiddle());
         }
-        firstSet();
+        firstSet(false);
         sql.append(Joiner.on(", ").join(columnStrings));
         return builder;
     }
@@ -106,7 +106,7 @@ public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSel
     public LambdaSelectDomBuilder selectAll() {
         isSelectAll = true;
         sql.append(" * ");
-        firstSet();
+        firstSet(false);
         return builder;
     }
 
