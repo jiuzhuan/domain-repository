@@ -5,6 +5,7 @@ import com.github.jiuzhuan.domain.repository.common.utils.LambdaColumnMap;
 import com.github.jiuzhuan.domain.repository.common.utils.StringBuilder;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;

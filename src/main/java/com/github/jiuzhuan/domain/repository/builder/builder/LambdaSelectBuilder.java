@@ -4,6 +4,7 @@ import com.github.jiuzhuan.domain.repository.common.utils.CheckArgUtil;
 import com.github.jiuzhuan.domain.repository.builder.interfaces.Func;
 import com.github.jiuzhuan.domain.repository.common.utils.PropertyNamer;
 import com.google.common.base.Joiner;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Map;
  * @date 2022/1/29 14:36
  */
 @Component
+@Scope("prototype")
 public class LambdaSelectBuilder extends AbstractWhereLambdaBuilder<LambdaSelectBuilder> implements Func<LambdaSelectBuilder> {
 
     public LambdaSelectBuilder() {

@@ -23,16 +23,26 @@ public class JdbcTemplateAdapter extends AbstractAdapter{
     @Autowired
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-
-    @Override
-    protected <Entity> List<Entity> sel(String sql, List<Object> values, Class<Entity> entityClass) throws SQLException {
+    private MapSqlParameterSource parameterSource(String sql, List<Object> values) {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         for (int i = 0; i < values.size(); i++) {
             String param = "param" + i;
-            sql = sql.replaceFirst("\\?", ":" + param);
             parameterSource.addValue(param, values.get(i));
         }
-        return namedParameterJdbcTemplate.query(sql, parameterSource, new BeanPropertyRowMapper<>(entityClass));
+        return parameterSource;
+    }
+
+    private String parameterSql(String sql, List<Object> values) {
+        for (int i = 0; i < values.size(); i++) {
+            String param = "param" + i;
+            sql = sql.replaceFirst("\\?", ":" + param);
+        }
+        return sql;
+    }
+
+    @Override
+    protected <Entity> List<Entity> sel(String sql, List<Object> values, Class<Entity> entityClass) {
+        return namedParameterJdbcTemplate.query(parameterSql(sql, values), parameterSource(sql, values), new BeanPropertyRowMapper<>(entityClass));
     }
 
     @Override
@@ -41,18 +51,12 @@ public class JdbcTemplateAdapter extends AbstractAdapter{
     }
 
     @Override
-    protected int upd(String sql, List<Object> values) throws SQLException {
-        return 0;
+    protected int upd(String sql, List<Object> values) {
+        return namedParameterJdbcTemplate.update(parameterSql(sql, values), parameterSource(sql, values));
     }
 
     @Override
-    protected <Entity> List<Map<String, Object>> selMapList(String sql, List<Object> values) throws SQLException {
-        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
-        for (int i = 0; i < values.size(); i++) {
-            String param = "param" + i;
-            sql = sql.replaceFirst("\\?", ":" + param);
-            parameterSource.addValue(param, values.get(i));
-        }
-        return namedParameterJdbcTemplate.queryForList(sql, parameterSource);
+    protected <Entity> List<Map<String, Object>> selMapList(String sql, List<Object> values) {
+        return namedParameterJdbcTemplate.queryForList(parameterSql(sql, values), parameterSource(sql, values));
     }
 }

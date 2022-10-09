@@ -8,8 +8,11 @@ import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import com.github.jiuzhuan.domain.repository.example.svc.OrderSvc;
+import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -185,13 +188,27 @@ public class OrderController {
         return orderDomain.getAutoDomains();
     }
 
-    @GetMapping("updateOrderBySlaveId")
-    public List<Order> updateOrderBySlaveId(@RequestParam("id") Integer id, @RequestParam("userName") String userName, @RequestParam("storeName") String storeName){
-//        LambdaUpdateBuilder updateBuilder = (LambdaUpdateBuilder)applicationContext.getBean("lambdaUpdateBuilder");
-        LambdaBuilder.update(MasterOrderInfo.class).leftJoin(SlaveOrderInfo.class).on(MasterOrderInfo::getId, SlaveOrderInfo::getMasterOrderInfoId)
+    @GetMapping("updateOrderById")
+    public List<Order> updateOrderById(@RequestParam("id") Integer id, @RequestParam("userName") String userName){
+        // h2不支持 update join
+        LambdaBuilder.update(MasterOrderInfo.class)
                 .set(MasterOrderInfo::getUserName, userName)
-                .set(SlaveOrderInfo::getStoreName, storeName)
                 .where().eq(MasterOrderInfo::getId, id).update();
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        return orderDomain.getAutoDomains();
+    }
+
+    @GetMapping("updateOrderDomain")
+    public List<Order> updateOrderDomain(@RequestParam("id") Integer id){
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        List<Order> orders = orderDomain.getDomains(Order.class);
+        orders.get(0).masterOrderInfo.userName = "updateOrderDomain";
+        orderDomain.save(orders);
+
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);

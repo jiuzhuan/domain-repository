@@ -4,6 +4,8 @@ import com.github.jiuzhuan.domain.repository.builder.interfaces.SetCase;
 import com.github.jiuzhuan.domain.repository.common.utils.PropertyNamer;
 import com.github.jiuzhuan.domain.repository.common.utils.SqlKeyword;
 import com.github.jiuzhuan.domain.repository.common.utils.StringBuilder;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 
@@ -12,6 +14,8 @@ import java.sql.SQLException;
  * @author arrety
  * @date 2022/1/29 14:36
  */
+@Component
+@Scope("prototype")
 public class LambdaInsertBuilder extends AbstractLambdaBuilder<LambdaInsertBuilder> implements SetCase<LambdaInsertBuilder> {
 
     private StringBuilder nestedSql = new StringBuilder();

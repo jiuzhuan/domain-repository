@@ -3,12 +3,16 @@ package com.github.jiuzhuan.domain.repository.builder.builder;
 import com.github.jiuzhuan.domain.repository.builder.interfaces.SetCase;
 import com.github.jiuzhuan.domain.repository.common.utils.SqlKeyword;
 import com.github.jiuzhuan.domain.repository.common.utils.PropertyNamer;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * 更新构造器
  * @author arrety
  * @date 2022/1/29 14:36
  */
+@Component
+@Scope("prototype")
 public class LambdaUpdateBuilder extends AbstractWhereLambdaBuilder<LambdaUpdateBuilder> implements SetCase<LambdaUpdateBuilder> {
 
 
@@ -31,7 +35,7 @@ public class LambdaUpdateBuilder extends AbstractWhereLambdaBuilder<LambdaUpdate
 
     @Override
     public LambdaUpdateBuilder appendSet(String filed, Object value) {
-        firstSet(false);
+        firstSet(true);
         sql.append(filed)
                 .append(SqlKeyword.EQ.getSqlSegment())
                 .append("?");

@@ -22,7 +22,8 @@ import java.util.*;
  * @date 2022/4/6 14:36
  */
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+//@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope("prototype")
 public class LambdaSelectItemBuilder extends LambdaSelectBuilder {
 
     /**

@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -25,6 +26,7 @@ import java.util.*;
  * @date 2022/4/10 16:10
  */
 @Component
+@Scope("prototype")
 public class LambdaSelectDomBuilder extends AbstractWhereLambdaBuilder<LambdaSelectDomBuilder> implements Func<LambdaSelectDomBuilder> {
 
     public LambdaSelectDomBuilder() {

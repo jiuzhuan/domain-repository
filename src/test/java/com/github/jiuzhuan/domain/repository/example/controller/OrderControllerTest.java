@@ -54,7 +54,7 @@ class OrderControllerTest {
     void getOrderGoods() {
         List<OrderGood> orderGoods = orderController.getOrderGoods();
 
-        assert orderGoods.size() == 4;
+        assert orderGoods.size() == 5;
         AssertDefaultData.assertGood1(orderGoods.get(0).orderGoodInfo);
         AssertDefaultData.assertGood2(orderGoods.get(1).orderGoodInfo);
     }
@@ -140,10 +140,8 @@ class OrderControllerTest {
     @Test
     void updateOrderBySlaveId() {
         String userName = "小李-update-1";
-        String storeName = "老乡鸡-update-1";
-        List<Order> orders = orderController.updateOrderBySlaveId(3, userName, storeName);
+        List<Order> orders = orderController.updateOrderBySlaveId(3, userName);
 
         assert Objects.equals(orders.get(0).masterOrderInfo.userName, userName);
-        assert Objects.equals(orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName, storeName);
     }
 }

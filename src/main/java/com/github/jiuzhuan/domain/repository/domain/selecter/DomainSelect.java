@@ -8,8 +8,10 @@ import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCach
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -129,7 +131,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     /**
-     * 获取结构化的结果 (投影)
+     * 获取结构化的结果 (类似于 spring data 的投影)
      * data -> domList
      * 1. 未知节点的子节点虽然可以按parentJoinField分组, 但是自身无法分组(没有明确的值), 所以未知节点及以上无法结构化
      * 2. 即使是已知节点 由于关联查询新实体时 新实体可能缺少数据(未关联上) 所以 可能会有部分实体无法分配到组(groupBy joinField) 这部分数据必须舍弃
@@ -144,12 +146,17 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         // 读缓存
         if (domList != null && ReflectionUtil.getGenericType(domList).equals(newDomClass)) return (List<T>) domList;
 
-        // 结构化
+        // 结构化 todo 避免反射
         domList = setDomain(newDomClass);
 
         return (List<T>) domList;
     }
 
+    /**
+     * 自动结构化结果 (自动投影)
+     * @return
+     * @param <T>
+     */
     @SneakyThrows
     public <T> List<T> getAutoDomains() {
         // 结构化: 寻找已知子树的最小聚合
@@ -176,6 +183,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     public List<Object> setDomain(Class<?> parentDomClass){
         // 解析聚合结构 并将数据分组
         List<Triple<Field, Class<?>, Map<Object, List<Object>>>> entityGroups = new ArrayList<>();
+        // TODO: 2022/10/9 使用树缓存
         for (Field field : parentDomClass.getDeclaredFields()) {
             Class<?> genericType = ReflectionUtil.getGenericType(field);
             if (genericType.isAnnotationPresent(Dom.class)) {
@@ -264,5 +272,23 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         // 清缓存 - 以便于重新结构化聚合
         domList = null;
         return items;
+    }
+
+    public <T> void save(List<T> orders) {
+        DomainTree tree = DomainTreeCache.get(ReflectionUtil.getGenericType(orders));
+        saveNodes(tree.rootNode, orders);
+    }
+
+    private <T> void saveNodes(DomainTreeNode rootNode, List<T> orders) {
+        saveNode(rootNode, orders);
+        if (CollectionUtils.isNotEmpty(rootNode.subNodes)) {
+            for (DomainTreeNode subNode : rootNode.subNodes) {
+                saveNode(subNode, orders);
+            }
+        }
+    }
+
+    private <T> void saveNode(DomainTreeNode node, List<T> orders) {
+
     }
 }
