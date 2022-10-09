@@ -140,7 +140,7 @@ class OrderControllerTest {
     @Test
     void updateOrderBySlaveId() {
         String userName = "小李-update-1";
-        List<Order> orders = orderController.updateOrderBySlaveId(3, userName);
+        List<Order> orders = orderController.updateOrderById(3, userName);
 
         assert Objects.equals(orders.get(0).masterOrderInfo.userName, userName);
     }

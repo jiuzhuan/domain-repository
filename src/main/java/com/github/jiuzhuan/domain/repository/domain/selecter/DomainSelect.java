@@ -274,21 +274,41 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         return items;
     }
 
-    public <T> void save(List<T> orders) {
-        DomainTree tree = DomainTreeCache.get(ReflectionUtil.getGenericType(orders));
-        saveNodes(tree.rootNode, orders);
+    /**
+     * id为null的新增 id不为null的更新 如果实体自查询出来候未曾改变 需要手动从domains里删除 否则也会执行更新
+     * 可为级联关联字段赋值, 但是如果已经有值则不再赋值, 未级联的实体则正常保存(关联字段未null)
+     * @param domians
+     * @param <T>
+     */
+    public <T> void save(List<T> domians) {
+        DomainTree tree = DomainTreeCache.get(ReflectionUtil.getGenericType(domians));
+        saveNodes(tree.rootNode, domians, null);
     }
 
-    private <T> void saveNodes(DomainTreeNode rootNode, List<T> orders) {
-        saveNode(rootNode, orders);
-        if (CollectionUtils.isNotEmpty(rootNode.subNodes)) {
+    private <T> void saveNodes(DomainTreeNode rootNode, List<T> domians, Object joinId) {
+        Object subJoinId = saveNode(rootNode, domians, joinId);
+        if (CollectionUtils.isEmpty(rootNode.subNodes)) return;
+
+        // 如果父节点有约束, 则为子节点赋值来自父节点的约束
+        // 如果父节点没有约束, 则从同级子节点实体中找一个约束再保存没有约束的实体 (如果是list实体找任意一个即可)
+        if (subJoinId == null) {
             for (DomainTreeNode subNode : rootNode.subNodes) {
-                saveNode(subNode, orders);
+                subJoinId = ClassReflection.getFieldValue(domians, subNode.fieldName);
+                subJoinId = subJoinId instanceof List ? ((List) subJoinId).get(0) : subJoinId;
+                if (subJoinId != null) break;
             }
+        }
+        for (DomainTreeNode subNode : rootNode.subNodes) {
+            saveNodes(subNode, domians, subJoinId);
         }
     }
 
-    private <T> void saveNode(DomainTreeNode node, List<T> orders) {
+    private <T> Object saveNode(DomainTreeNode node, List<T> domians, Object joinId) {
+        // domain == null 返回 null约束
+        return null;
+        // id == null 则新增
+
+        // id != null 则更新
 
     }
 }

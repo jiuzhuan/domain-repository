@@ -72,7 +72,7 @@ public class ThreadScopeDomain<DomEntity> implements DomainRepository<DomEntity>
         selectDomainThreadLocal.remove();
     }
 
-    public void save(List<Order> orders) {
-        this.selectDomainThreadLocal.get().save(orders);
+    public <T> void save(List<T> domians) {
+        this.selectDomainThreadLocal.get().save(domians);
     }
 }
