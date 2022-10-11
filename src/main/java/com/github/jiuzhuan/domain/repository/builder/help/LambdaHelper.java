@@ -82,7 +82,7 @@ public class LambdaHelper {
                 .selectList(UserRoleEntity.class);
 
         // 更新, 泛型为库名来源, 可以和表名不同
-        int update = LambdaBuilder
+        Long update = LambdaBuilder
                 .update(UserEntity.class)
                 .set(UserEntity::getName, userEntity.getName())
                 .set(UserEntity::getPhoneNumber, userEntity.getPhoneNumber())
@@ -94,7 +94,7 @@ public class LambdaHelper {
                 .update();
 
         // 插入, 泛型为库名来源, 可以和表名不同
-        int insertOrUpdate = LambdaBuilder
+        Long insertOrUpdate = LambdaBuilder
                 .insertInto(UserEntity.class)
                 .set(userEntity)
                 // 或者使用重载方法set单个字段, 可重复调用

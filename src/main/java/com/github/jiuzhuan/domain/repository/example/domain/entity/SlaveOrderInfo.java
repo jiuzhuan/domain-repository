@@ -1,6 +1,9 @@
 package com.github.jiuzhuan.domain.repository.example.domain.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import javax.persistence.Id;
 
 /**
  * @author arrety
@@ -9,6 +12,7 @@ import lombok.Data;
 @Data
 public class SlaveOrderInfo {
 
+    @Id
     public Integer id;
     public Integer masterOrderInfoId;
     public String storeName;

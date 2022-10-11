@@ -107,7 +107,8 @@ public class ClassReflection {
                 Iterator iterator = ((Collection) targetFieldValue).iterator();
                 List<Object> targetFieldValues = new ArrayList<>();
                 while (iterator.hasNext()){
-                    targetFieldValues.add(getFieldValue(iterator.next(), subFieldName));
+                    Object fieldValue = getFieldValue(iterator.next(), subFieldName);
+                    if (fieldValue != null) targetFieldValues.add(fieldValue);
                 }
                 return (T)targetFieldValues;
             }

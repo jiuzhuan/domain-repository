@@ -29,6 +29,10 @@ public abstract class AbstractWhereLambdaBuilder<Builder> extends AbstractLambda
 
     protected  <T> void appendSql(SFunction<T, ?> column, SqlKeyword sqlKeyword, Object value) {
         String columnName = getColumn(column);
+        appendWhere(sqlKeyword, value, columnName);
+    }
+
+    public Builder appendWhere(SqlKeyword sqlKeyword, Object value, String columnName) {
         if (!sql.toString().endsWith("( ")) {
             sql.append(SqlKeyword.AND.getSqlSegment());
         }
@@ -36,6 +40,7 @@ public abstract class AbstractWhereLambdaBuilder<Builder> extends AbstractLambda
                 .append(sqlKeyword.getSqlSegment())
                 .append(" ? ");
         values.add(value);
+        return builder;
     }
 
     public Builder where() {

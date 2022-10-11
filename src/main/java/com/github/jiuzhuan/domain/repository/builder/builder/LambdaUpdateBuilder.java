@@ -44,8 +44,8 @@ public class LambdaUpdateBuilder extends AbstractWhereLambdaBuilder<LambdaUpdate
     }
 
 
-    public int update() {
-        return adapter.update(sql.toString(), values);
+    public <T> T update() {
+        return (T)adapter.update(sql.toString(), values);
     }
 
 }

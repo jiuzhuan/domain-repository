@@ -5,9 +5,10 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +52,10 @@ public class JdbcTemplateAdapter extends AbstractAdapter{
     }
 
     @Override
-    protected int upd(String sql, List<Object> values) {
-        return namedParameterJdbcTemplate.update(parameterSql(sql, values), parameterSource(sql, values));
+    protected Number upd(String sql, List<Object> values) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(parameterSql(sql, values), parameterSource(sql, values), keyHolder);
+        return keyHolder.getKey();
     }
 
     @Override

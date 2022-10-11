@@ -22,7 +22,7 @@ public abstract class AbstractAdapter {
 
     protected abstract <Entity> List<Entity> sel(String sql, List<Object> values, Class<Entity> entityClass) throws SQLException;
 
-    public int update(String sql, List<Object> values){
+    public Number update(String sql, List<Object> values){
         try {
             return upd(sql, values);
         }catch (Exception e){
@@ -32,7 +32,7 @@ public abstract class AbstractAdapter {
 
     public abstract void resolveDatabase(Class<?> entityClass);
 
-    protected abstract int upd(String sql, List<Object> values) throws SQLException;
+    protected abstract Number upd(String sql, List<Object> values) throws SQLException;
 
     public <Entity> List<Map<String, Object>> selectMapList(String sql, List<Object> values){
         try {

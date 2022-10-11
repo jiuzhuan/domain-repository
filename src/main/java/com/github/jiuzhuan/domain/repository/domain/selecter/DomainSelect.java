@@ -1,28 +1,28 @@
 package com.github.jiuzhuan.domain.repository.domain.selecter;
 
+import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectDomBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectItemBuilder;
+import com.github.jiuzhuan.domain.repository.common.utils.SqlKeyword;
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCache;
 import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
-import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil.getGenericType;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * 聚合仓库
@@ -144,7 +144,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     public <T> List<T> getDomains(Class<T> newDomClass) {
 
         // 读缓存
-        if (domList != null && ReflectionUtil.getGenericType(domList).equals(newDomClass)) return (List<T>) domList;
+        if (domList != null && getGenericType(domList).equals(newDomClass)) return (List<T>) domList;
 
         // 结构化 todo 避免反射
         domList = setDomain(newDomClass);
@@ -185,7 +185,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         List<Triple<Field, Class<?>, Map<Object, List<Object>>>> entityGroups = new ArrayList<>();
         // TODO: 2022/10/9 使用树缓存
         for (Field field : parentDomClass.getDeclaredFields()) {
-            Class<?> genericType = ReflectionUtil.getGenericType(field);
+            Class<?> genericType = getGenericType(field);
             if (genericType.isAnnotationPresent(Dom.class)) {
                 DomainTree subDomainTree = DomainTreeCache.get(genericType);
                 List<?> subDoms = setDomain(genericType);
@@ -281,34 +281,73 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param <T>
      */
     public <T> void save(List<T> domians) {
-        DomainTree tree = DomainTreeCache.get(ReflectionUtil.getGenericType(domians));
-        saveNodes(tree.rootNode, domians, null);
+        DomainTree tree = DomainTreeCache.get(getGenericType(domians));
+        for (T domian : domians) {
+            saveDomains(tree.rootNode, domian, null);
+        }
     }
 
-    private <T> void saveNodes(DomainTreeNode rootNode, List<T> domians, Object joinId) {
-        Object subJoinId = saveNode(rootNode, domians, joinId);
-        if (CollectionUtils.isEmpty(rootNode.subNodes)) return;
+    private <T> void saveDomains(DomainTreeNode rootNode, T domian, Object parentJoinId) {
 
-        // 如果父节点有约束, 则为子节点赋值来自父节点的约束
-        // 如果父节点没有约束, 则从同级子节点实体中找一个约束再保存没有约束的实体 (如果是list实体找任意一个即可)
-        if (subJoinId == null) {
-            for (DomainTreeNode subNode : rootNode.subNodes) {
-                subJoinId = ClassReflection.getFieldValue(domians, subNode.fieldName);
-                subJoinId = subJoinId instanceof List ? ((List) subJoinId).get(0) : subJoinId;
-                if (subJoinId != null) break;
+        // 同级子节点实体中找一个约束再保存没有约束的实体 (如果是list实体找任意一个即可)
+        ArrayList<DomainTreeNode> levelNodes = new ArrayList<>();
+        levelNodes.add(rootNode);
+        levelNodes.addAll(rootNode.subNodes);
+        Object joinId = null;
+        if (parentJoinId == null) {
+            for (DomainTreeNode subNode : levelNodes) {
+                String fieldName = subNode.parentFieldName == null || subNode == rootNode ? subNode.fieldName : subNode.parentFieldName + "." + subNode.fieldName;
+                Object subEntity = ClassReflection.getFieldValue(domian, fieldName);
+                if (subEntity == null || (subEntity instanceof List && isEmpty((List)subEntity))) continue;
+                joinId = ClassReflection.getFieldValue(subEntity, subNode.entityJoinField);
+                if (joinId instanceof List) {
+                    joinId = ((List) joinId).get(0);
+                }
+                if (joinId != null) break;
             }
         }
+
+        // 保存聚合根(如果有的话) 并返回父约束
+        parentJoinId = saveEntities(rootNode, ClassReflection.getFieldValue(domian, rootNode.fieldName), parentJoinId, joinId);
+
+        // 递归处理子节点
         for (DomainTreeNode subNode : rootNode.subNodes) {
-            saveNodes(subNode, domians, subJoinId);
+            String fieldName = subNode.parentFieldName == null ? subNode.fieldName : subNode.parentFieldName;
+            Object subValue = ClassReflection.getFieldValue(domian, fieldName);
+            if (subValue == null || (subValue instanceof List && isEmpty((List)subValue))) continue;
+            if (subValue instanceof List){
+                if (ReflectionUtil.getGenericType(subValue).isAnnotationPresent(Dom.class)) {
+                    for (Object value : (List) subValue) {
+                        saveDomains(subNode, value, parentJoinId);
+                    }
+                } else {
+                    for (Object value : (List) subValue) {
+                        saveEntities(subNode, value, null, parentJoinId);
+                    }
+                }
+            } else {
+                if (ReflectionUtil.getGenericType(subValue).isAnnotationPresent(Dom.class)) {
+                    saveDomains(subNode, subValue, parentJoinId);
+                } else {
+                    saveEntities(subNode, subValue, null, parentJoinId);
+                }
+            }
         }
     }
 
-    private <T> Object saveNode(DomainTreeNode node, List<T> domians, Object joinId) {
+    private Object saveEntities(DomainTreeNode node, Object entity, Object parentJoinId, Object joinId) {
+        // 赋值约束
+        if (node.parentJoinField != null)  ClassReflection.setFieldValue(entity, node.parentJoinField, parentJoinId);
+        ClassReflection.setFieldValue(entity, node.entityJoinField, joinId);
         // domain == null 返回 null约束
-        return null;
-        // id == null 则新增
-
-        // id != null 则更新
-
+        if (entity == null) return null;
+        // id == null 则新增 否则更新
+        Object id = ClassReflection.getFieldValue(entity, node.idField);
+        if (id == null) {
+            id = LambdaBuilder.insertInto(node.entityClass).set(entity).insert();
+        } else {
+            LambdaBuilder.update(node.entityClass).set(entity).where().appendWhere(SqlKeyword.EQ, id, node.idField.getName()).update();
+        }
+        return Objects.equals(node.entityJoinField, node.idField.getName()) ? id : joinId;
     }
 }

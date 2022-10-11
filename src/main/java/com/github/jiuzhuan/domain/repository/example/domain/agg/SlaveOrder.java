@@ -6,6 +6,7 @@ import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDisc
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderServiceInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;

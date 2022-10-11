@@ -4,6 +4,7 @@ import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaUpdateBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -205,13 +208,38 @@ public class OrderController {
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
         List<Order> orders = orderDomain.getDomains(Order.class);
-        orders.get(0).masterOrderInfo.userName = "updateOrderDomain";
+        orders.get(0).masterOrderInfo.userName = "updateOrderDomain11";
+        orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName = "updateOrderDomain11";
+        SlaveOrder slaveOrder = new SlaveOrder();
+        SlaveOrderInfo slaveOrderInfo = new SlaveOrderInfo();
+        slaveOrderInfo.storeName = "add";
+        slaveOrder.slaveOrderInfo = slaveOrderInfo;
+        OrderGoodDiscountInfo orderGoodDiscountInfo = new OrderGoodDiscountInfo();
+        orderGoodDiscountInfo.discount = new BigDecimal("0.11");
+        slaveOrder.orderGoodDiscountInfo = orderGoodDiscountInfo;
+        orders.get(0).slaveOrder.add(slaveOrder);
+        OrderAddressInfo orderAddressInfo = new OrderAddressInfo();
+        orderAddressInfo.address = "add";
+        orders.get(0).orderAddressInfo = orderAddressInfo;
+        List<OrderService> orderServices = new ArrayList<>();
+        OrderService orderService = new OrderService();
+        OrderServiceInfo orderServiceInfo = new OrderServiceInfo();
+        orderServiceInfo.serviceName = "add-service";
+        orderService.orderServiceInfo = orderServiceInfo;
+        orderServices.add(orderService);
+        orders.get(0).slaveOrder.get(0).orderService = orderServices;
+        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo.goodName = "good-update";
         orderDomain.save(orders);
 
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderServiceInfo.class);
         return orderDomain.getAutoDomains();
     }
 }

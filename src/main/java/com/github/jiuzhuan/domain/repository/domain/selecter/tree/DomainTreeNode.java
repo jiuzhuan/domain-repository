@@ -1,5 +1,6 @@
 package com.github.jiuzhuan.domain.repository.domain.selecter.tree;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -50,9 +51,19 @@ public class DomainTreeNode {
      */
     public String fieldName;
 
+    /**
+     * 所在聚合在父聚合里的属性名
+     */
+    public String parentFieldName;
+
+    /**
+     * 主键属性
+     */
+    public Field idField;
+
 
     public DomainTreeNode(Integer parentDomClassLevel, Class<?> parentDomClass, Class<?> entityClass, DomainTreeNode parentNode,
-                          String entityJoinField, String parentJoinField, Boolean isLeaf, String fieldName) {
+                          String entityJoinField, String parentJoinField, Boolean isLeaf, String fieldName, String parentFieldName, Field idField) {
         this.parentDomClass = parentDomClass;
         this.entityClass = entityClass;
         this.parentNode = parentNode;
@@ -61,5 +72,7 @@ public class DomainTreeNode {
         this.parentDomClassLevel = parentDomClassLevel;
         this.isLeaf = isLeaf;
         this.fieldName = fieldName;
+        this.parentFieldName = parentFieldName;
+        this.idField = idField;
     }
 }

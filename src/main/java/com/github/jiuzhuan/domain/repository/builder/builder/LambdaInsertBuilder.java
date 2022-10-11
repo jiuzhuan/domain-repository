@@ -61,12 +61,17 @@ public class LambdaInsertBuilder extends AbstractLambdaBuilder<LambdaInsertBuild
      * @return
      * @throws SQLException
      */
-    public int insertOrUpdate() {
+    public <T> T insertOrUpdate() {
         sql.append(nestedSql.toString())
                 .append(" on duplicate key update ")
                 .append(nestedSql.toString());
         values.addAll(values);
-        return adapter.update(sql.toString(), values);
+        return (T)adapter.update(sql.toString(), values);
+    }
+
+    public <T> T insert() {
+        sql.append(nestedSql.toString());
+        return (T)adapter.update(sql.toString(), values);
     }
 
 }

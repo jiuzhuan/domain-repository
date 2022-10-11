@@ -2,6 +2,7 @@ package com.github.jiuzhuan.domain.repository.example.domain.entity;
 
 import lombok.Data;
 
+import javax.persistence.Id;
 import java.math.BigDecimal;
 
 /**
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 @Data
 public class OrderServicePriceInfo {
 
+    @Id
     public Integer id;
     public Integer orderServiceInfoId;
     public BigDecimal price;
