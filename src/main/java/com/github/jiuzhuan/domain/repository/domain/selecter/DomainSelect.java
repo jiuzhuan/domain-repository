@@ -308,7 +308,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         }
 
         // 保存聚合根(如果有的话) 并返回父约束
-        parentJoinId = saveEntities(rootNode, ClassReflection.getFieldValue(domian, rootNode.fieldName), parentJoinId, joinId);
+        joinId = saveEntities(rootNode, ClassReflection.getFieldValue(domian, rootNode.fieldName), parentJoinId, joinId);
 
         // 递归处理子节点
         for (DomainTreeNode subNode : rootNode.subNodes) {
@@ -318,18 +318,18 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
             if (subValue instanceof List){
                 if (ReflectionUtil.getGenericType(subValue).isAnnotationPresent(Dom.class)) {
                     for (Object value : (List) subValue) {
-                        saveDomains(subNode, value, parentJoinId);
+                        saveDomains(subNode, value, joinId);
                     }
                 } else {
                     for (Object value : (List) subValue) {
-                        saveEntities(subNode, value, null, parentJoinId);
+                        saveEntities(subNode, value, null, joinId);
                     }
                 }
             } else {
                 if (ReflectionUtil.getGenericType(subValue).isAnnotationPresent(Dom.class)) {
                     saveDomains(subNode, subValue, parentJoinId);
                 } else {
-                    saveEntities(subNode, subValue, null, parentJoinId);
+                    saveEntities(subNode, subValue, null, joinId);
                 }
             }
         }
