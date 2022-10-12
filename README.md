@@ -227,3 +227,4 @@ public class GetOrderApi2 {
 6. 并发/异步 (getEntity多参数并行 或 getEntitySync)
 7. 查询优化 (分批查询/覆盖索引/等)
 8. 缓存 (考虑spring Cache)
+9. 避免反射(运行时生成包装类, 通过包装类操作目标类属性和创建目标类实例)
