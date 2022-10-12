@@ -11,6 +11,7 @@ import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
 import lombok.SneakyThrows;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -294,17 +295,16 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
         levelNodes.add(rootNode);
         levelNodes.addAll(rootNode.subNodes);
         Object joinId = null;
-        if (parentJoinId == null) {
-            for (DomainTreeNode subNode : levelNodes) {
-                String fieldName = subNode.parentFieldName == null || subNode == rootNode ? subNode.fieldName : subNode.parentFieldName + "." + subNode.fieldName;
-                Object subEntity = ClassReflection.getFieldValue(domian, fieldName);
-                if (subEntity == null || (subEntity instanceof List && isEmpty((List)subEntity))) continue;
-                joinId = ClassReflection.getFieldValue(subEntity, subNode.entityJoinField);
-                if (joinId instanceof List) {
-                    joinId = ((List) joinId).get(0);
-                }
-                if (joinId != null) break;
+        for (DomainTreeNode subNode : levelNodes) {
+            String fieldName = subNode.parentFieldName == null || subNode == rootNode ? subNode.fieldName : subNode.parentFieldName + "." + subNode.fieldName;
+            Object subEntity = ClassReflection.getFieldValue(domian, fieldName);
+            if (subEntity == null || (subEntity instanceof List && isEmpty((List)subEntity))) continue;
+            joinId = ClassReflection.getFieldValue(subEntity, subNode.entityJoinField);
+            if (joinId instanceof List) {
+                List joinIds = (List) joinId;
+                joinId = CollectionUtils.isNotEmpty(joinIds) ? joinIds.get(0) : null;
             }
+            if (joinId != null) break;
         }
 
         // 保存聚合根(如果有的话) 并返回父约束
@@ -336,8 +336,9 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     private Object saveEntities(DomainTreeNode node, Object entity, Object parentJoinId, Object joinId) {
-        // 赋值约束
+        // 强制覆盖约束父约束(如果有的话)
         if (node.parentJoinField != null)  ClassReflection.setFieldValue(entity, node.parentJoinField, parentJoinId);
+        // 强制覆盖约束父约束和子约束
         ClassReflection.setFieldValue(entity, node.entityJoinField, joinId);
         // domain == null 返回 null约束
         if (entity == null) return null;

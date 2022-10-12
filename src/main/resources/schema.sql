@@ -71,8 +71,8 @@ INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (4, 3, '
 INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (3, 3, 0.7);
 
 
-INSERT INTO master_order_info (id, user_name) values (3, '小张forUpdate');
+INSERT INTO master_order_info (id, user_name) values (3, '小张');
 
-INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 3, '老乡鸡forUpdate');
-INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 4, '鸡汤forUpdate');
-INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (4, 4, 0.7);
+INSERT INTO slave_order_info (id, master_order_info_id, store_name) values (4, 3, '必胜客');
+INSERT INTO order_good_info (id, slave_order_info_id, good_name) values (5, 4, '披萨');
+INSERT INTO order_good_discount_info (id, slave_order_info_id, discount) values (4, 4, 0.11);

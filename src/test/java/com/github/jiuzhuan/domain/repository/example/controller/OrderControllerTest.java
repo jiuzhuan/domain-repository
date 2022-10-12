@@ -6,6 +6,7 @@ import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author pengfwang@trip.com
  * @date 2022/9/23 14:48
  */
+@Transactional
 @SpringBootTest
 class OrderControllerTest {
 
@@ -143,5 +145,15 @@ class OrderControllerTest {
         List<Order> orders = orderController.updateOrderById(3, userName);
 
         assert Objects.equals(orders.get(0).masterOrderInfo.userName, userName);
+    }
+
+    @Test
+    void updateOrderDomain() {
+        List<Order> orders = orderController.updateOrderDomain(3);
+    }
+
+    @Test
+    void addOrderDomain() {
+        List<Order> orders = orderController.addOrderDomain();
     }
 }

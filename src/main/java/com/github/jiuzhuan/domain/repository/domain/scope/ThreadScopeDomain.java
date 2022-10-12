@@ -73,6 +73,8 @@ public class ThreadScopeDomain<DomEntity> implements DomainRepository<DomEntity>
     }
 
     public <T> void save(List<T> domians) {
+        DomainSelect<DomEntity> selectDom = (DomainSelect)applicationContext.getBean("domainSelect");
+        this.selectDomainThreadLocal.set(selectDom);
         this.selectDomainThreadLocal.get().save(domians);
     }
 }

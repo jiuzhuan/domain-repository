@@ -1,25 +1,19 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
-import com.github.jiuzhuan.domain.repository.builder.builder.LambdaUpdateBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import com.github.jiuzhuan.domain.repository.example.svc.OrderSvc;
-import org.h2.jdbcx.JdbcDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,7 +53,7 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
-        orderSvc.checkOrders();
+        orderSvc.checkScope();
         return orderDomain.getAutoDomains();
     }
 
@@ -205,41 +199,65 @@ public class OrderController {
 
     @GetMapping("updateOrderDomain")
     public List<Order> updateOrderDomain(@RequestParam("id") Integer id){
+
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
+        orderDomain.getEntity(OrderServiceInfo.class);
+        orderDomain.getEntity(OrderServicePriceInfo.class);
         List<Order> orders = orderDomain.getDomains(Order.class);
-        orders.get(0).masterOrderInfo.userName = "updateOrderDomain11";
-        orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName = "updateOrderDomain11";
-        SlaveOrder slaveOrder = new SlaveOrder();
-        SlaveOrderInfo slaveOrderInfo = new SlaveOrderInfo();
-        slaveOrderInfo.storeName = "add";
-        slaveOrder.slaveOrderInfo = slaveOrderInfo;
-        OrderGoodDiscountInfo orderGoodDiscountInfo = new OrderGoodDiscountInfo();
-        orderGoodDiscountInfo.discount = new BigDecimal("0.11");
-        slaveOrder.orderGoodDiscountInfo = orderGoodDiscountInfo;
-        orders.get(0).slaveOrder.add(slaveOrder);
-        OrderAddressInfo orderAddressInfo = new OrderAddressInfo();
-        orderAddressInfo.address = "add";
-        orders.get(0).orderAddressInfo = orderAddressInfo;
-        List<OrderService> orderServices = new ArrayList<>();
-        OrderService orderService = new OrderService();
-        OrderServiceInfo orderServiceInfo = new OrderServiceInfo();
-        orderServiceInfo.serviceName = "add-service";
-        orderService.orderServiceInfo = orderServiceInfo;
-        orderServices.add(orderService);
-        orders.get(0).slaveOrder.get(0).orderService = orderServices;
-        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo.goodName = "good-update";
+
+        // 更新
+        orders.get(0).masterOrderInfo.userName = "update";
+        orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName = "update";
+        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo.goodName = "update";
+        orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo.discount = new BigDecimal("0.22");
+        // 新增
+        orders.get(0).orderAddressInfo = orderSvc.orderAddressInfo();
+        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodRemarkInfo = orderSvc.orderGoodRemarkInfo();
+        orders.get(0).slaveOrder.get(0).orderGood.add(orderSvc.orderGood());
+        orders.get(0).slaveOrder.get(0).orderService = orderSvc.orderServices();
+        orders.get(0).slaveOrder.add(orderSvc.slaveOrder());
         orderDomain.save(orders);
 
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
-        orderDomain.getEntity(OrderAddressInfo.class);
-        orderDomain.getEntity(OrderGoodInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
         orderDomain.getEntity(OrderServiceInfo.class);
-        return orderDomain.getAutoDomains();
+        orderDomain.getEntity(OrderServicePriceInfo.class);
+        List<Order> ac =  orderDomain.getAutoDomains();
+        // 有添加  重复执行会报错(正常现象)
+        orderSvc.equal_order(orders, ac);
+        return ac;
+    }
+
+    @GetMapping("addOrderDomain")
+    public List<Order> addOrderDomain(){
+
+        List<Order> orders = orderSvc.orders();
+        orders.add(orderSvc.order());
+        orderDomain.save(orders);
+
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getUserName, "add");
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(SlaveOrderInfo.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderAddressInfo.class);
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
+        orderDomain.getEntity(OrderServiceInfo.class);
+        orderDomain.getEntity(OrderServicePriceInfo.class);
+        List<Order> ac =  orderDomain.getAutoDomains();
+        // 有添加  重复执行会报错(正常现象)
+        orderSvc.equal_order(orders, ac);
+        return ac;
     }
 }
