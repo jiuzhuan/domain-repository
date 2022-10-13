@@ -21,6 +21,9 @@ import java.util.Optional;
 @Service
 public class OrderSvc {
 
+    public static final String ADD = "add";
+    public static final String UPDATE = "update";
+
     @Autowired
     OrderDomain orderDomain;
 
@@ -118,13 +121,13 @@ public class OrderSvc {
 
     public MasterOrderInfo masterOrderInfo(){
         MasterOrderInfo masterOrderInfo = new MasterOrderInfo();
-        masterOrderInfo.userName = "add";
+        masterOrderInfo.userName = ADD;
         return masterOrderInfo;
     }
     
     public OrderAddressInfo orderAddressInfo(){
         OrderAddressInfo orderAddressInfo = new OrderAddressInfo();
-        orderAddressInfo.address = "add";
+        orderAddressInfo.address = ADD;
         return orderAddressInfo;
     }
 
@@ -145,7 +148,7 @@ public class OrderSvc {
 
     public SlaveOrderInfo slaveOrderInfo(){
         SlaveOrderInfo slaveOrderInfo = new SlaveOrderInfo();
-        slaveOrderInfo.storeName = "add";
+        slaveOrderInfo.storeName = ADD;
         return slaveOrderInfo;
     }
 
@@ -164,13 +167,13 @@ public class OrderSvc {
 
     public OrderGoodInfo orderGoodInfo() {
         OrderGoodInfo orderGoodInfo = new OrderGoodInfo();
-        orderGoodInfo.goodName = "add";
+        orderGoodInfo.goodName = ADD;
         return orderGoodInfo;
     }
 
     public OrderGoodRemarkInfo orderGoodRemarkInfo() {
         OrderGoodRemarkInfo orderGoodRemarkInfo = new OrderGoodRemarkInfo();
-        orderGoodRemarkInfo.remark = "add";
+        orderGoodRemarkInfo.remark = ADD;
         return orderGoodRemarkInfo;
     }
 
@@ -189,7 +192,7 @@ public class OrderSvc {
 
     public OrderServiceInfo orderServiceInfo(){
         OrderServiceInfo orderServiceInfo = new OrderServiceInfo();
-        orderServiceInfo.serviceName = "add";
+        orderServiceInfo.serviceName = ADD;
         return orderServiceInfo;
     }
 

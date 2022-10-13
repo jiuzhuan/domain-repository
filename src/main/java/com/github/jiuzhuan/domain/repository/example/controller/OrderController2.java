@@ -3,11 +3,9 @@ package com.github.jiuzhuan.domain.repository.example.controller;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectBuilder;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.MasterOrderInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodDiscountInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.SlaveOrderInfo;
+import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,40 +28,135 @@ public class OrderController2 {
     @GetMapping("getOrders2")
     public List<Order> getOrders2(){
 
-        List<MasterOrderInfo> masterOrderInfos = lambdaSelectBuilder.selectAll().from(MasterOrderInfo.class).where().selectList(MasterOrderInfo.class);
+        List<MasterOrderInfo> masterOrderInfos = getMasterOrderInfos();
         List<Integer> masterOrderInfoIds = masterOrderInfos.stream().map(MasterOrderInfo::getId).collect(Collectors.toList());
+        List<OrderAddressInfo> orderAddressInfos = getOrderAddressInfos(masterOrderInfoIds);
 
-        List<SlaveOrderInfo> slaveOrderInfos = lambdaSelectBuilder.selectAll().from(SlaveOrderInfo.class).where().in(SlaveOrderInfo::getMasterOrderInfoId, masterOrderInfoIds).selectList(SlaveOrderInfo.class);
+        List<SlaveOrderInfo> slaveOrderInfos = getSlaveOrderInfos(masterOrderInfoIds);
         List<Integer> slaveOrderIds = slaveOrderInfos.stream().map(SlaveOrderInfo::getId).collect(Collectors.toList());
-        Map<Integer, List<SlaveOrderInfo>> slaveOrderMap = slaveOrderInfos.stream().collect(Collectors.groupingBy(SlaveOrderInfo::getMasterOrderInfoId));
 
-        List<OrderGoodInfo> orderGoodInfos = lambdaSelectBuilder.selectAll().from(OrderGoodInfo.class).where().in(OrderGoodInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodInfo.class);
-        Map<Integer, List<OrderGoodInfo>> orderGoodMap = orderGoodInfos.stream().collect(Collectors.groupingBy(OrderGoodInfo::getSlaveOrderInfoId));
+        List<OrderGoodInfo> orderGoodInfos = getOrderGoodInfos(slaveOrderIds);
+        List<Integer> orderGoodInfoIds = orderGoodInfos.stream().map(OrderGoodInfo::getId).collect(Collectors.toList());
+        List<OrderGoodRemarkInfo> orderGoodRemarkInfos = getOrderGoodRemarkInfos(orderGoodInfoIds);
 
-        List<OrderGoodDiscountInfo> orderGoodDiscountInfos = lambdaSelectBuilder.selectAll().from(OrderGoodDiscountInfo.class).where().in(OrderGoodDiscountInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodDiscountInfo.class);
-        Map<Integer, OrderGoodDiscountInfo> orderGoodDiscountMap = orderGoodDiscountInfos.stream().collect(Collectors.toMap(OrderGoodDiscountInfo::getSlaveOrderInfoId, orderGoodDiscountInfo -> orderGoodDiscountInfo));
+        List<OrderServiceInfo> orderServiceInfos = getOrderServiceInfos(slaveOrderIds);
+        List<Integer> orderServiceInfoIds = orderServiceInfos.stream().map(OrderServiceInfo::getId).collect(Collectors.toList());
+        List<OrderServicePriceInfo> orderServicePriceInfos = getOrderServicePriceInfos(orderServiceInfoIds);
 
+        List<OrderGoodDiscountInfo> orderGoodDiscounts = getOrderGoodDiscountInfos(slaveOrderIds);
+
+        return buildOrders(masterOrderInfos, orderAddressInfos, slaveOrderInfos, orderGoodInfos, orderGoodRemarkInfos, orderServiceInfos, orderServicePriceInfos, orderGoodDiscounts);
+    }
+
+    @GetMapping("getOrderGoods2")
+    public List<Order> getOrderGoods2(){
+
+    }
+
+    private List<Order> buildOrders(List<MasterOrderInfo> masterOrderInfos, List<OrderAddressInfo> orderAddressInfos, List<SlaveOrderInfo> slaveOrderInfos,
+                                    List<OrderGoodInfo> orderGoodInfos, List<OrderGoodRemarkInfo> orderGoodRemarkInfos, List<OrderServiceInfo> orderServiceInfos,
+                                    List<OrderServicePriceInfo> orderServicePriceInfos, List<OrderGoodDiscountInfo> orderGoodDiscount) {
+        List<SlaveOrder> slaveOrders = buildSlaveOrders(slaveOrderInfos, orderGoodInfos, orderGoodRemarkInfos, orderServiceInfos, orderServicePriceInfos, orderGoodDiscount);
+        Map<Integer, List<SlaveOrder>> slaveMap = slaveOrders.stream().collect(Collectors.groupingBy(item -> item.slaveOrderInfo.masterOrderInfoId));
+        Map<Integer, OrderAddressInfo> addressMap = orderAddressInfos.stream().collect(Collectors.toMap(OrderAddressInfo::getMasterOrderInfoId, item -> item));
         List<Order> orders = new ArrayList<>();
         for (MasterOrderInfo masterOrderInfo : masterOrderInfos) {
-            List<SlaveOrder> slaveOrders = new ArrayList<>();
-            for (SlaveOrderInfo slaveOrderInfo : slaveOrderMap.get(masterOrderInfo.getId())) {
-                SlaveOrder slaveOrder = new SlaveOrder();
-                slaveOrder.setSlaveOrderInfo(slaveOrderInfo);
-                List<OrderGood> orderGoods = new ArrayList<>();
-                for (OrderGoodInfo orderGoodInfo : orderGoodMap.get(slaveOrderInfo.getId())) {
-                    OrderGood orderGood = new OrderGood();
-                    orderGood.setOrderGoodInfo(orderGoodInfo);
-                    orderGoods.add(orderGood);
-                }
-                slaveOrder.setOrderGood(orderGoods);
-                slaveOrder.setOrderGoodDiscountInfo(orderGoodDiscountMap.get(slaveOrderInfo.getId()));
-                slaveOrders.add(slaveOrder);
-            }
             Order order = new Order();
-            order.setMasterOrderInfo(masterOrderInfo);
-            order.setSlaveOrder(slaveOrders);
+            order.masterOrderInfo = masterOrderInfo;
+            order.orderAddressInfo = addressMap.get(masterOrderInfo.getId());
+            order.slaveOrder = slaveMap.get(masterOrderInfo.getId());
             orders.add(order);
         }
         return orders;
     }
+
+    private List<SlaveOrder> buildSlaveOrders(List<SlaveOrderInfo> slaveOrderInfos, List<OrderGoodInfo> orderGoodInfos, List<OrderGoodRemarkInfo> orderGoodRemarkInfos,
+                                              List<OrderServiceInfo> orderServiceInfos, List<OrderServicePriceInfo> orderServicePriceInfos, List<OrderGoodDiscountInfo> orderGoodDiscount) {
+        List<OrderGood> orderGoods = buildOrderGoods(orderGoodInfos, orderGoodRemarkInfos);
+        Map<Integer, List<OrderGood>> goodMap = orderGoods.stream().collect(Collectors.groupingBy(item -> item.orderGoodInfo.slaveOrderInfoId));
+        List<OrderService> orderServices = buildOrderServices(orderServiceInfos, orderServicePriceInfos);
+        Map<Integer, List<OrderService>> serviceMap = orderServices.stream().collect(Collectors.groupingBy(item -> item.orderServiceInfo.slaveOrderInfoId));
+        List<OrderGoodDiscountInfo> orderGoodDiscountInfos = getOrderGoodDiscountInfos(slaveOrderInfos.stream().map(SlaveOrderInfo::getId).collect(Collectors.toList()));
+        Map<Integer, OrderGoodDiscountInfo> discountMap = orderGoodDiscountInfos.stream().collect(Collectors.toMap(OrderGoodDiscountInfo::getSlaveOrderInfoId, item -> item));
+        List<SlaveOrder> result = new ArrayList<>();
+        for (SlaveOrderInfo item : slaveOrderInfos) {
+            SlaveOrder resultItem = new SlaveOrder();
+            resultItem.slaveOrderInfo = item;
+            resultItem.orderGood = goodMap.get(item.id);
+            resultItem.orderService = serviceMap.get(item.id);
+            resultItem.orderGoodDiscountInfo = discountMap.get(item.id);
+            result.add(resultItem);
+        }
+        return result;
+    }
+
+    private List<OrderGood> buildOrderGoods(List<OrderGoodInfo> orderGoodInfos, List<OrderGoodRemarkInfo> orderGoodRemarkInfos) {
+        Map<Integer, OrderGoodRemarkInfo> map = orderGoodRemarkInfos.stream().collect(Collectors.toMap(OrderGoodRemarkInfo::getOrderGoodInfoId, item -> item));
+        List<OrderGood> result = new ArrayList<>();
+        for (OrderGoodInfo item : orderGoodInfos) {
+            OrderGood resultItem = new OrderGood();
+            resultItem.orderGoodInfo = item;
+            resultItem.orderGoodRemarkInfo = map.get(item.id);
+            result.add(resultItem);
+        }
+        return result;
+    }
+
+    private List<OrderService> buildOrderServices(List<OrderServiceInfo> orderServiceInfos, List<OrderServicePriceInfo> orderServicePriceInfos) {
+        Map<Integer, OrderServicePriceInfo> map = orderServicePriceInfos.stream().collect(Collectors.toMap(OrderServicePriceInfo::getOrderServiceInfoId, item -> item));
+        List<OrderService> result = new ArrayList<>();
+        for (OrderServiceInfo item : orderServiceInfos) {
+            OrderService resultItem = new OrderService();
+            resultItem.orderServiceInfo = item;
+            resultItem.orderServicePriceInfo = map.get(item.id);
+            result.add(resultItem);
+        }
+        return result;
+    }
+
+    private List<MasterOrderInfo> getMasterOrderInfos(){
+        return lambdaSelectBuilder.selectAll().from(MasterOrderInfo.class)
+                .where().selectList(MasterOrderInfo.class);
+    }
+
+    private List<MasterOrderInfo> getMasterOrderInfos(List<Integer> masterOrderInfoIds){
+        return lambdaSelectBuilder.selectAll().from(MasterOrderInfo.class)
+                .where().in(MasterOrderInfo::getId, masterOrderInfoIds).selectList(MasterOrderInfo.class);
+    }
+
+    private List<OrderAddressInfo> getOrderAddressInfos(List<Integer> masterOrderInfoIds){
+        return lambdaSelectBuilder.selectAll().from(OrderAddressInfo.class)
+                .where().in(OrderAddressInfo::getMasterOrderInfoId, masterOrderInfoIds).selectList(OrderAddressInfo.class);
+    }
+
+    private List<SlaveOrderInfo> getSlaveOrderInfos(List<Integer> masterOrderInfoIds){
+        return lambdaSelectBuilder.selectAll().from(SlaveOrderInfo.class)
+                .where().in(SlaveOrderInfo::getMasterOrderInfoId, masterOrderInfoIds).selectList(SlaveOrderInfo.class);
+    }
+
+    private List<OrderGoodInfo> getOrderGoodInfos(List<Integer> slaveOrderIds){
+        return lambdaSelectBuilder.selectAll().from(OrderGoodInfo.class)
+                .where().in(OrderGoodInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodInfo.class);
+    }
+
+    private List<OrderGoodRemarkInfo> getOrderGoodRemarkInfos(List<Integer> OrderGoodInfoIds){
+        return lambdaSelectBuilder.selectAll().from(OrderGoodRemarkInfo.class)
+                .where().in(OrderGoodRemarkInfo::getOrderGoodInfoId, OrderGoodInfoIds).selectList(OrderGoodRemarkInfo.class);
+    }
+
+    private List<OrderServiceInfo> getOrderServiceInfos(List<Integer> slaveOrderIds){
+        return lambdaSelectBuilder.selectAll().from(OrderServiceInfo.class)
+                .where().in(OrderServiceInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderServiceInfo.class);
+    }
+
+    private List<OrderServicePriceInfo> getOrderServicePriceInfos(List<Integer> orderServiceInfoIds){
+        return lambdaSelectBuilder.selectAll().from(OrderServicePriceInfo.class)
+                .where().in(OrderServicePriceInfo::getOrderServiceInfoId, orderServiceInfoIds).selectList(OrderServicePriceInfo.class);
+    }
+
+    private List<OrderGoodDiscountInfo> getOrderGoodDiscountInfos(List<Integer> slaveOrderIds){
+        return lambdaSelectBuilder.selectAll().from(OrderGoodDiscountInfo.class)
+                .where().in(OrderGoodDiscountInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodDiscountInfo.class);
+    }
+
 }

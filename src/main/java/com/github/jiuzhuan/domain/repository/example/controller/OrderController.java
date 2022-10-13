@@ -31,9 +31,6 @@ public class OrderController {
     @Autowired
     OrderDomain orderDomain;
 
-    @Autowired
-    private ApplicationContext applicationContext;
-
     @GetMapping("getOrders")
     public List<Order> getOrders(){
         // 顺序1
@@ -215,9 +212,9 @@ public class OrderController {
         List<Order> orders = orderDomain.getDomains(Order.class);
 
         // 更新
-        orders.get(0).masterOrderInfo.userName = "update";
-        orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName = "update";
-        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo.goodName = "update";
+        orders.get(0).masterOrderInfo.userName = OrderSvc.UPDATE;
+        orders.get(0).slaveOrder.get(0).slaveOrderInfo.storeName = OrderSvc.UPDATE;
+        orders.get(0).slaveOrder.get(0).orderGood.get(0).orderGoodInfo.goodName = OrderSvc.UPDATE;
         orders.get(0).slaveOrder.get(0).orderGoodDiscountInfo.discount = new BigDecimal("0.22");
         // 新增
         orders.get(0).orderAddressInfo = orderSvc.orderAddressInfo();
@@ -253,7 +250,7 @@ public class OrderController {
         List<SlaveOrder> slaveOrders = orderDomain.getAutoDomains();
 
         // 更新
-        slaveOrders.get(0).orderGood.get(0).orderGoodInfo.goodName = "update";
+        slaveOrders.get(0).orderGood.get(0).orderGoodInfo.goodName = OrderSvc.UPDATE;
         slaveOrders.get(0).orderGoodDiscountInfo.discount = new BigDecimal("0.22");
         // 新增
         slaveOrders.get(0).orderGood.get(0).orderGoodRemarkInfo = orderSvc.orderGoodRemarkInfo();
@@ -262,7 +259,7 @@ public class OrderController {
         slaveOrders.add(orderSvc.slaveOrder());
         orderDomain.save(slaveOrders);
 
-        orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getServiceName, "add");
+        orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getServiceName, OrderSvc.ADD);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
@@ -288,7 +285,7 @@ public class OrderController {
         orders.add(orderSvc.order());
         orderDomain.save(orders);
 
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getUserName, "add");
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getUserName, OrderSvc.ADD);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
