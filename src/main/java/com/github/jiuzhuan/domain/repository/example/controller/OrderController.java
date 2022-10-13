@@ -1,6 +1,7 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
+import com.github.jiuzhuan.domain.repository.example.common.transaction.Rollback;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
@@ -20,6 +21,7 @@ import java.util.List;
  * @author arrety
  * @date 2022/1/29 11:12
  */
+@Rollback
 @RestController
 public class OrderController {
 
@@ -197,10 +199,11 @@ public class OrderController {
         return orderDomain.getAutoDomains();
     }
 
-    @GetMapping("updateOrderDomain")
-    public List<Order> updateOrderDomain(@RequestParam("id") Integer id){
+    @GetMapping("updateOrder")
+    public List<Order> updateOrder(){
+        Integer masterOrderInfoId = 3;
 
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, masterOrderInfoId);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
@@ -224,7 +227,7 @@ public class OrderController {
         orders.get(0).slaveOrder.add(orderSvc.slaveOrder());
         orderDomain.save(orders);
 
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
+        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, masterOrderInfoId);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
@@ -234,13 +237,52 @@ public class OrderController {
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
         List<Order> ac =  orderDomain.getAutoDomains();
-        // 有添加  重复执行会报错(正常现象)
+
+        // 验证插入是否正确 (有事务 可重复执行)
         orderSvc.equal_order(orders, ac);
         return ac;
     }
 
-    @GetMapping("addOrderDomain")
-    public List<Order> addOrderDomain(){
+    @GetMapping("updateSlaveOrder")
+    public List<SlaveOrder> updateSlaveOrder(){
+        Integer orderGoodInfoId = 4;
+
+        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, orderGoodInfoId);
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        List<SlaveOrder> slaveOrders = orderDomain.getAutoDomains();
+
+        // 更新
+        slaveOrders.get(0).orderGood.get(0).orderGoodInfo.goodName = "update";
+        slaveOrders.get(0).orderGoodDiscountInfo.discount = new BigDecimal("0.22");
+        // 新增
+        slaveOrders.get(0).orderGood.get(0).orderGoodRemarkInfo = orderSvc.orderGoodRemarkInfo();
+        slaveOrders.get(0).orderGood.add(orderSvc.orderGood());
+        slaveOrders.get(0).orderService = orderSvc.orderServices();
+        slaveOrders.add(orderSvc.slaveOrder());
+        orderDomain.save(slaveOrders);
+
+        orderDomain.selectAll().from(OrderServiceInfo.class).where().eq(OrderServiceInfo::getServiceName, "add");
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderServicePriceInfo.class);
+        orderDomain.getEntity(OrderGoodInfo.class);
+        orderDomain.getEntity(OrderGoodRemarkInfo.class);
+        List<SlaveOrder> ac =  orderDomain.getAutoDomains();
+
+        orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getSlaveOrderInfoId, 5);
+        orderDomain.execute(Order.class);
+        orderDomain.getEntity(OrderGoodDiscountInfo.class);
+        orderDomain.getEntity(OrderServiceInfo.class);
+
+        // 验证插入是否正确 (有事务 可重复执行)
+        slaveOrders.get(1).slaveOrderInfo = null;
+        orderSvc.equals_slaveOrder(slaveOrders, ac);
+        return ac;
+    }
+
+    @GetMapping("addOrder")
+    public List<Order> addOrder(){
 
         List<Order> orders = orderSvc.orders();
         orders.add(orderSvc.order());
@@ -256,7 +298,8 @@ public class OrderController {
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
         List<Order> ac =  orderDomain.getAutoDomains();
-        // 有添加  重复执行会报错(正常现象)
+
+        // 验证插入是否正确 (有事务  可重复执行)
         orderSvc.equal_order(orders, ac);
         return ac;
     }

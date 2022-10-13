@@ -148,12 +148,17 @@ class OrderControllerTest {
     }
 
     @Test
-    void updateOrderDomain() {
-        List<Order> orders = orderController.updateOrderDomain(3);
+    void updateOrder() {
+        orderController.updateOrder();
     }
 
     @Test
-    void addOrderDomain() {
-        List<Order> orders = orderController.addOrderDomain();
+    void updateSlaveOrder() {
+        orderController.updateSlaveOrder();
+    }
+
+    @Test
+    void addOrder() {
+        orderController.addOrder();
     }
 }

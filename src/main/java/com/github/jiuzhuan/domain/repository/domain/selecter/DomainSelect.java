@@ -192,13 +192,17 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 List<?> subDoms = setDomain(genericType);
                 if (subDoms == null) continue;
                 DomainTreeNode subNode = domainTree.getNodeByEntity(subDomainTree.rootNode.entityClass);
-                Map<Object, List<Object>> group = subDoms.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
+                Map<Object, List<Object>> group = subDoms.stream()
+                        .filter(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField) != null)
+                        .collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, subNode.fieldName + "." + subNode.parentJoinField)));
                 entityGroups.add(Triple.of(field, genericType, group));
             } else {
                 DomainTreeNode entityNode = domainTree.getNodeByEntity(genericType);
-                List<Object> subEntitys = data.get(genericType);
-                if (subEntitys == null) continue;
-                Map<Object, List<Object>> group = subEntitys.stream().collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
+                List<Object> subEntities = data.get(genericType);
+                if (subEntities == null) continue;
+                Map<Object, List<Object>> group = subEntities.stream()
+                        .filter(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField) != null)
+                        .collect(Collectors.groupingBy(d -> ClassReflection.getFieldValue(d, entityNode.entityJoinField)));
                 entityGroups.add(Triple.of(field, genericType, group));
             }
         }
@@ -290,7 +294,8 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
 
     private <T> void saveDomains(DomainTreeNode rootNode, T domian, Object parentJoinId) {
 
-        // 同级子节点实体中找一个约束再保存没有约束的实体 (如果是list实体找任意一个即可)
+        // 同级子节点实体中找一个约束再保存没有约束的实体
+        // 由于本层中的父节点不一定有本层的约束, 需要从同级节点中找一个本层约束
         ArrayList<DomainTreeNode> levelNodes = new ArrayList<>();
         levelNodes.add(rootNode);
         levelNodes.addAll(rootNode.subNodes);
@@ -299,15 +304,16 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
             String fieldName = subNode.parentFieldName == null || subNode == rootNode ? subNode.fieldName : subNode.parentFieldName + "." + subNode.fieldName;
             Object subEntity = ClassReflection.getFieldValue(domian, fieldName);
             if (subEntity == null || (subEntity instanceof List && isEmpty((List)subEntity))) continue;
-            joinId = ClassReflection.getFieldValue(subEntity, subNode.entityJoinField);
+            joinId = ClassReflection.getFieldValue(subEntity, subNode.parentJoinField != null && subNode != rootNode ? subNode.parentJoinField : subNode.entityJoinField);
             if (joinId instanceof List) {
+                // 如果是list实体找任意一个..就这样了, 爱咋咋地
                 List joinIds = (List) joinId;
                 joinId = CollectionUtils.isNotEmpty(joinIds) ? joinIds.get(0) : null;
             }
             if (joinId != null) break;
         }
 
-        // 保存聚合根(如果有的话) 并返回父约束
+        // 保存聚合根(如果有的话) 并返回父约束 (有可能是主键. 所以这里要覆盖一次joinId)
         joinId = saveEntities(rootNode, ClassReflection.getFieldValue(domian, rootNode.fieldName), parentJoinId, joinId);
 
         // 递归处理子节点
@@ -327,7 +333,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
                 }
             } else {
                 if (ReflectionUtil.getGenericType(subValue).isAnnotationPresent(Dom.class)) {
-                    saveDomains(subNode, subValue, parentJoinId);
+                    saveDomains(subNode, subValue, joinId);
                 } else {
                     saveEntities(subNode, subValue, null, joinId);
                 }
@@ -336,12 +342,12 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
     }
 
     private Object saveEntities(DomainTreeNode node, Object entity, Object parentJoinId, Object joinId) {
+        // domain == null 返回 原约束
+        if (entity == null) return joinId;
         // 强制覆盖约束父约束(如果有的话)
         if (node.parentJoinField != null)  ClassReflection.setFieldValue(entity, node.parentJoinField, parentJoinId);
         // 强制覆盖约束父约束和子约束
         ClassReflection.setFieldValue(entity, node.entityJoinField, joinId);
-        // domain == null 返回 null约束
-        if (entity == null) return null;
         // id == null 则新增 否则更新
         Object id = ClassReflection.getFieldValue(entity, node.idField);
         if (id == null) {
