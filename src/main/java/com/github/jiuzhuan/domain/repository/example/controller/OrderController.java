@@ -2,6 +2,7 @@ package com.github.jiuzhuan.domain.repository.example.controller;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
 import com.github.jiuzhuan.domain.repository.example.common.transaction.Rollback;
+import com.github.jiuzhuan.domain.repository.example.common.utils.OrderCompareUtil;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
@@ -9,7 +10,6 @@ import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
 import com.github.jiuzhuan.domain.repository.example.domain.OrderDomain;
 import com.github.jiuzhuan.domain.repository.example.svc.OrderSvc;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,10 +32,11 @@ public class OrderController {
     OrderDomain orderDomain;
 
     @Autowired
-    OrderController2 orderController2;
+    OrderController_old orderControllerOld;
 
     @GetMapping("getOrders")
     public List<Order> getOrders(){
+        // 查询全部
         // 顺序1
         orderDomain.selectAll().from(MasterOrderInfo.class).where();
         orderDomain.execute(Order.class);
@@ -56,13 +57,12 @@ public class OrderController {
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
         orderSvc.checkScope();
-        List<Order> result = orderDomain.getAutoDomains();
-        orderSvc.equal_order(orderController2.getOrders2(), result);
-        return result;
+        return orderDomain.getAutoDomains();
     }
 
     @GetMapping("getOrderGoods")
     public List<OrderGood> getOrderGoods(){
+        // 查询全部-指定映射到小聚合
         // 顺序1
         orderDomain.selectAll().from(MasterOrderInfo.class).where();
         orderDomain.execute(Order.class);
@@ -80,13 +80,12 @@ public class OrderController {
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderAddressInfo.class);
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
-        List<OrderGood> result = orderDomain.getAutoDomains();
-        orderSvc.equals_orderGood(orderController2.getOrderGoods2(), result);
-        return result;
+        return orderDomain.getDomains(OrderGood.class);
     }
 
     @GetMapping("getOrderByOrderId")
     public List<Order> getOrderByOrderId(@RequestParam("id") Integer id){
+        // 从聚合根初始化 并关联查询其它实体
         // 顺序1
         orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getId, id);
         orderDomain.execute(Order.class);
@@ -101,13 +100,12 @@ public class OrderController {
         orderDomain.getAutoDomains();
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
-        List<Order> result = orderDomain.getAutoDomains();
-        orderSvc.equal_order(orderController2.getOrderByOrderId2(id), result);
-        return result;
+        return orderDomain.getAutoDomains();
     }
 
     @GetMapping("getOrderBySlaveOrderInfoId")
     public List<Order> getOrderBySlaveOrderInfoId(@RequestParam("id") Integer id){
+        // 从任意节点初始化 并关联查询其它实体
         // 顺序1
         orderDomain.selectAll().from(SlaveOrderInfo.class).where().eq(SlaveOrderInfo::getId, id);
         orderDomain.execute(Order.class);
@@ -120,9 +118,7 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         orderDomain.getEntity(MasterOrderInfo.class);
-        List<Order> result = orderDomain.getAutoDomains();
-        orderSvc.equal_order(orderController2.getOrderBySlaveOrderInfoId2(id), result);
-        return result;
+        return orderDomain.getAutoDomains();
     }
 
     @GetMapping("getOrderByOrderGoodInfoId")
@@ -173,6 +169,7 @@ public class OrderController {
 
     @GetMapping("getGoodByDiscountId")
     public List<SlaveOrder> getGoodByDiscountId(@RequestParam("id") Integer id){
+        // 跳过同级子节点跳过父节点关联查询
         orderDomain.selectAll().from(OrderGoodDiscountInfo.class).where().eq(OrderGoodDiscountInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(OrderGoodInfo.class);
@@ -181,6 +178,7 @@ public class OrderController {
 
     @GetMapping("getMasterByGoodId")
     public List<Order> getMasterByGoodId(@RequestParam("id") Integer id){
+        // 由下至上关联
         orderDomain.selectAll().from(OrderGoodInfo.class).where().eq(OrderGoodInfo::getId, id);
         orderDomain.execute(Order.class);
         orderDomain.getEntity(MasterOrderInfo.class);
@@ -247,7 +245,7 @@ public class OrderController {
         List<Order> ac =  orderDomain.getAutoDomains();
 
         // 验证插入是否正确 (有事务 可重复执行)
-        orderSvc.equal_order(orders, ac);
+        OrderCompareUtil.equals(orders, ac);
         return ac;
     }
 
@@ -285,7 +283,7 @@ public class OrderController {
 
         // 验证插入是否正确 (有事务 可重复执行)
         slaveOrders.get(1).slaveOrderInfo = null;
-        orderSvc.equals_slaveOrder(slaveOrders, ac);
+        OrderCompareUtil.equals(slaveOrders, ac);
         return ac;
     }
 
@@ -308,7 +306,7 @@ public class OrderController {
         List<Order> ac =  orderDomain.getAutoDomains();
 
         // 验证插入是否正确 (有事务  可重复执行)
-        orderSvc.equal_order(orders, ac);
+        OrderCompareUtil.equals(orders, ac);
         return ac;
     }
 }

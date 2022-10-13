@@ -1,14 +1,21 @@
 package com.github.jiuzhuan.domain.repository.example.controller;
 
+import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
+import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
+import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author pengfwang@trip.com
  * @date 2022/9/23 17:40
  */
-public class AssertDefaultData {
+public class AssertData {
 
     public static void assertOrder1(MasterOrderInfo info) {
         assert Objects.equals(info.userName, "老王");
