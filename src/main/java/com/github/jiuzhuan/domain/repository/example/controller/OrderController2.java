@@ -6,6 +6,7 @@ import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
 import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.*;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,8 +50,32 @@ public class OrderController2 {
     }
 
     @GetMapping("getOrderGoods2")
-    public List<Order> getOrderGoods2(){
+    public List<OrderGood> getOrderGoods2(){
+        List<OrderGoodInfo> orderGoodInfos = getOrderGoodInfos();
+        List<Integer> orderGoodInfoIds = orderGoodInfos.stream().map(OrderGoodInfo::getId).collect(Collectors.toList());
+        List<OrderGoodRemarkInfo> orderGoodRemarkInfos = getOrderGoodRemarkInfos(orderGoodInfoIds);
+        return buildOrderGoods(orderGoodInfos, orderGoodRemarkInfos);
+    }
 
+    @GetMapping("getOrderByOrderId2")
+    public List<Order> getOrderByOrderId2(Integer id){
+
+        List<MasterOrderInfo> masterOrderInfos = getMasterOrderInfos(Lists.newArrayList(id));
+        List<Integer> masterOrderInfoIds = masterOrderInfos.stream().map(MasterOrderInfo::getId).collect(Collectors.toList());
+
+        List<SlaveOrderInfo> slaveOrderInfos = getSlaveOrderInfos(masterOrderInfoIds);
+        List<Integer> slaveOrderIds = slaveOrderInfos.stream().map(SlaveOrderInfo::getId).collect(Collectors.toList());
+
+        List<OrderGoodInfo> orderGoodInfos = getOrderGoodInfos(slaveOrderIds);
+
+        List<OrderGoodDiscountInfo> orderGoodDiscounts = getOrderGoodDiscountInfos(slaveOrderIds);
+
+        return buildOrders(masterOrderInfos, new ArrayList<>(), slaveOrderInfos, orderGoodInfos, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), orderGoodDiscounts);
+    }
+
+    @GetMapping("getOrderBySlaveOrderInfoId2")
+    public List<Order> getOrderBySlaveOrderInfoId2(Integer id) {
+        return getOrderByOrderId2(id);
     }
 
     private List<Order> buildOrders(List<MasterOrderInfo> masterOrderInfos, List<OrderAddressInfo> orderAddressInfos, List<SlaveOrderInfo> slaveOrderInfos,
@@ -134,6 +159,11 @@ public class OrderController2 {
                 .where().in(SlaveOrderInfo::getMasterOrderInfoId, masterOrderInfoIds).selectList(SlaveOrderInfo.class);
     }
 
+    private List<OrderGoodInfo> getOrderGoodInfos(){
+        return lambdaSelectBuilder.selectAll().from(OrderGoodInfo.class)
+                .where().selectList(OrderGoodInfo.class);
+    }
+
     private List<OrderGoodInfo> getOrderGoodInfos(List<Integer> slaveOrderIds){
         return lambdaSelectBuilder.selectAll().from(OrderGoodInfo.class)
                 .where().in(OrderGoodInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodInfo.class);
@@ -158,5 +188,4 @@ public class OrderController2 {
         return lambdaSelectBuilder.selectAll().from(OrderGoodDiscountInfo.class)
                 .where().in(OrderGoodDiscountInfo::getSlaveOrderInfoId, slaveOrderIds).selectList(OrderGoodDiscountInfo.class);
     }
-
 }

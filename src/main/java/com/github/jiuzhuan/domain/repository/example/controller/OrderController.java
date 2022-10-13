@@ -31,6 +31,9 @@ public class OrderController {
     @Autowired
     OrderDomain orderDomain;
 
+    @Autowired
+    OrderController2 orderController2;
+
     @GetMapping("getOrders")
     public List<Order> getOrders(){
         // 顺序1
@@ -53,7 +56,9 @@ public class OrderController {
         orderDomain.getEntity(OrderServiceInfo.class);
         orderDomain.getEntity(OrderServicePriceInfo.class);
         orderSvc.checkScope();
-        return orderDomain.getAutoDomains();
+        List<Order> result = orderDomain.getAutoDomains();
+        orderSvc.equal_order(orderController2.getOrders2(), result);
+        return result;
     }
 
     @GetMapping("getOrderGoods")
@@ -75,7 +80,9 @@ public class OrderController {
         orderDomain.getEntity(MasterOrderInfo.class);
         orderDomain.getEntity(OrderAddressInfo.class);
         orderDomain.getEntity(OrderGoodRemarkInfo.class);
-        return orderDomain.getDomains(OrderGood.class);
+        List<OrderGood> result = orderDomain.getAutoDomains();
+        orderSvc.equals_orderGood(orderController2.getOrderGoods2(), result);
+        return result;
     }
 
     @GetMapping("getOrderByOrderId")
@@ -94,7 +101,9 @@ public class OrderController {
         orderDomain.getAutoDomains();
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(SlaveOrderInfo.class);
-        return orderDomain.getAutoDomains();
+        List<Order> result = orderDomain.getAutoDomains();
+        orderSvc.equal_order(orderController2.getOrderByOrderId2(id), result);
+        return result;
     }
 
     @GetMapping("getOrderBySlaveOrderInfoId")
@@ -111,7 +120,9 @@ public class OrderController {
         orderDomain.getEntity(OrderGoodDiscountInfo.class);
         orderDomain.getEntity(OrderGoodInfo.class);
         orderDomain.getEntity(MasterOrderInfo.class);
-        return orderDomain.getAutoDomains();
+        List<Order> result = orderDomain.getAutoDomains();
+        orderSvc.equal_order(orderController2.getOrderBySlaveOrderInfoId2(id), result);
+        return result;
     }
 
     @GetMapping("getOrderByOrderGoodInfoId")
