@@ -1,4 +1,4 @@
-package com.github.jiuzhuan.domain.repository.domain.selecter.tree;
+package com.github.jiuzhuan.domain.repository.domain.core.tree;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 领域聚合结构缓存

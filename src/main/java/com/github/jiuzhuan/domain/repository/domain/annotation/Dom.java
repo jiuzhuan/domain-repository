@@ -1,7 +1,7 @@
 package com.github.jiuzhuan.domain.repository.domain.annotation;
 
 import org.springframework.stereotype.Component;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
+import com.github.jiuzhuan.domain.repository.domain.core.tree.DomainTree;
 
 import java.lang.annotation.*;
 

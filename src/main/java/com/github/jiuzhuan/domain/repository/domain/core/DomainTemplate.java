@@ -1,13 +1,13 @@
-package com.github.jiuzhuan.domain.repository.domain.selecter;
+package com.github.jiuzhuan.domain.repository.domain.core;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectDomBuilder;
 import com.github.jiuzhuan.domain.repository.builder.builder.LambdaSelectItemBuilder;
 import com.github.jiuzhuan.domain.repository.common.utils.SqlKeyword;
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeCache;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
+import com.github.jiuzhuan.domain.repository.domain.core.tree.DomainTree;
+import com.github.jiuzhuan.domain.repository.domain.core.tree.DomainTreeCache;
+import com.github.jiuzhuan.domain.repository.domain.core.tree.DomainTreeNode;
 import com.github.jiuzhuan.domain.repository.domain.utils.ClassReflection;
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
 import lombok.SneakyThrows;
@@ -27,6 +27,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * 聚合仓库
+ * 聚合仓库
  * 1. 可以直接使用, 也可以通过DomainRepository代理使用, 以获取作用域的管理
  *
  * @author arrety
@@ -35,7 +36,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 @Component
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 @Scope("prototype")
-public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements DomainRepository{
+public class DomainTemplate<DomEntity> extends LambdaSelectDomBuilder implements DomainRepository{
 
     /**
      * 聚合实体类型
@@ -141,6 +142,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @return 结果
      * @param <T>
      */
+    @Override
     @SneakyThrows
     public <T> List<T> getDomains(Class<T> newDomClass) {
 
@@ -158,6 +160,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @return
      * @param <T>
      */
+    @Override
     @SneakyThrows
     public <T> List<T> getAutoDomains() {
         // 结构化: 寻找已知子树的最小聚合
@@ -285,6 +288,7 @@ public class DomainSelect<DomEntity> extends LambdaSelectDomBuilder implements D
      * @param domians
      * @param <T>
      */
+    @Override
     public <T> void save(List<T> domians) {
         DomainTree tree = DomainTreeCache.get(getGenericType(domians));
         for (T domian : domians) {

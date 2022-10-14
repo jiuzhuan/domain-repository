@@ -1,7 +1,6 @@
-package com.github.jiuzhuan.domain.repository.domain.selecter.tree;
+package com.github.jiuzhuan.domain.repository.domain.core.tree;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 领域聚合结构化树 -> 实体关系树

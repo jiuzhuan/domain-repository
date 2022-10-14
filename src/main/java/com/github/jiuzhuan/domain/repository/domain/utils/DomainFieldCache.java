@@ -1,11 +1,6 @@
 package com.github.jiuzhuan.domain.repository.domain.utils;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
-import com.github.jiuzhuan.domain.repository.domain.selecter.DomainSelect;
-import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
-import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

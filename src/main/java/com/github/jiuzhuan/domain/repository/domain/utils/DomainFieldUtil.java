@@ -1,22 +1,15 @@
 package com.github.jiuzhuan.domain.repository.domain.utils;
 
-import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTree;
-import com.github.jiuzhuan.domain.repository.domain.selecter.tree.DomainTreeNode;
 import com.google.common.collect.Lists;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 领域对象表列字段赋值
