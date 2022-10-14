@@ -3,7 +3,6 @@ package com.github.jiuzhuan.domain.repository.domain.scope;
 
 import com.github.jiuzhuan.domain.repository.builder.builder.SFunction;
 import com.github.jiuzhuan.domain.repository.domain.selecter.DomainSelect;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

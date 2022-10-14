@@ -1,10 +1,10 @@
 package com.github.jiuzhuan.domain.repository.example.common.utils;
 
 import com.github.jiuzhuan.domain.repository.domain.utils.ReflectionUtil;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.Order;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderGood;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.OrderService;
-import com.github.jiuzhuan.domain.repository.example.domain.agg.SlaveOrder;
+import com.github.jiuzhuan.domain.repository.example.domain.aggregation.Order;
+import com.github.jiuzhuan.domain.repository.example.domain.aggregation.OrderGood;
+import com.github.jiuzhuan.domain.repository.example.domain.aggregation.OrderService;
+import com.github.jiuzhuan.domain.repository.example.domain.aggregation.SlaveOrder;
 import org.springframework.util.Assert;
 
 import java.util.List;

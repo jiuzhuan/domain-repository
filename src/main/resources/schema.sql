@@ -3,49 +3,49 @@
 CREATE TABLE master_order_info
 (
     id        INT  AUTO_INCREMENT  PRIMARY KEY,
-    user_name VARCHAR(30) comment 'user name'
+    user_name VARCHAR(30) comment '用户名'
 );
 CREATE TABLE order_address_info
 (
     id                   INT  AUTO_INCREMENT  PRIMARY KEY,
     master_order_info_id INT  comment 'master_order_info.id',
-    address           VARCHAR(30) comment 'address'
+    address           VARCHAR(30) comment '收货地址'
 );
 CREATE TABLE slave_order_info
 (
     id                   INT  AUTO_INCREMENT  PRIMARY KEY,
     master_order_info_id INT  comment 'master_order_info.id',
-    store_name           VARCHAR(30) comment 'store name'
+    store_name           VARCHAR(30) comment '商家名'
 );
 CREATE TABLE order_service_info
 (
     id                  INT  AUTO_INCREMENT  PRIMARY KEY,
     slave_order_info_id INT  comment 'slave_order_info.id',
-    service_name           VARCHAR(30) comment 'service name'
+    service_name           VARCHAR(30) comment '服务名'
 );
 CREATE TABLE order_service_price_info
 (
     id                  INT  AUTO_INCREMENT  PRIMARY KEY,
     order_service_info_id INT  comment 'order_service_info.id',
-    price           DECIMAL(10,2) comment 'price'
+    price           DECIMAL(10,2) comment '服务价格'
 );
 CREATE TABLE order_good_info
 (
     id                  INT  AUTO_INCREMENT  PRIMARY KEY,
     slave_order_info_id INT  comment 'slave_order_info.id',
-    good_name           VARCHAR(30) comment 'good name'
+    good_name           VARCHAR(30) comment '商品名'
 );
 CREATE TABLE order_good_remark_info
 (
     id                  INT  AUTO_INCREMENT  PRIMARY KEY,
     order_good_info_id INT  comment 'order_good_info.id',
-    remark           VARCHAR(30) comment 'remark'
+    remark           VARCHAR(30) comment '商品备注'
 );
 CREATE TABLE order_good_discount_info
 (
     id                  INT AUTO_INCREMENT  PRIMARY KEY,
     slave_order_info_id INT  comment 'slave_order_info.id',
-    discount            DECIMAL(10,2) comment 'discount'
+    discount            DECIMAL(10,2) comment '折扣'
 );
 
 INSERT INTO master_order_info (id, user_name) values (1, '老王');

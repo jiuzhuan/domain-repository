@@ -1,9 +1,7 @@
-package com.github.jiuzhuan.domain.repository.example.domain.agg;
+package com.github.jiuzhuan.domain.repository.example.domain.aggregation;
 
 import com.github.jiuzhuan.domain.repository.domain.annotation.Dom;
 import com.github.jiuzhuan.domain.repository.domain.annotation.JoinOn;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodInfo;
-import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderGoodRemarkInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderServiceInfo;
 import com.github.jiuzhuan.domain.repository.example.domain.entity.OrderServicePriceInfo;
 import lombok.Data;
