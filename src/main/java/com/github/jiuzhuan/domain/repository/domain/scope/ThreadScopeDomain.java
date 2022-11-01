@@ -4,8 +4,10 @@ package com.github.jiuzhuan.domain.repository.domain.scope;
 import com.github.jiuzhuan.domain.repository.builder.builder.SFunction;
 import com.github.jiuzhuan.domain.repository.domain.core.DomainTemplate;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,6 +25,11 @@ import java.util.List;
  */
 @Component
 public class ThreadScopeDomain<DomEntity> implements DomainRepository<DomEntity> {
+
+    // spring管理的bean 必须用srping的反射工具类解析泛型
+    private Class<DomEntity> entityClass =
+            (Class<DomEntity>) GenericTypeResolver.resolveTypeArgument(this.getClass(), ThreadScopeDomain.class);
+//            (Class<DomEntity>) TypeUtils.getTypeArguments(this.getClass(), ThreadScopeDomain.class).values().iterator().next();
 
     @Autowired
     private ApplicationContext applicationContext;

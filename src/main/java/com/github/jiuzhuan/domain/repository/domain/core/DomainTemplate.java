@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -75,7 +76,7 @@ public class DomainTemplate<DomEntity> extends LambdaSelectDomBuilder implements
      */
     public Map<Class<?>, List<Object>> execute(Class<DomEntity> domClass) {
 
-        // 由于泛型擦除机制 所以只能在执行时传入泛型...
+        // 由于泛型擦除机制 所以只能在执行时传入泛型...  (GenericTypeResolver只能解析派生类的泛型, ((ParameterizedType) class.getGenericSuperclass()).getActualTypeArguments()也是)
         this.domClass = domClass;
         this.domainTree = DomainTreeCache.get(domClass);
 

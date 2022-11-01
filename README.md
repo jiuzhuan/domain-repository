@@ -216,7 +216,7 @@ public class GetOrderApi2 {
 3. [spring data jpa](https://docs.spring.io/spring-data/jpa/docs/3.0.0-M6/reference/html/#projections)
 (和 spring data jdbc 差不多的问题)
 4. [fluent-mybatis](https://gitee.com/fluent-mybatis/fluent-mybatis) (类型安全, 只需entity, 可联表, 但是无聚合)
-5. [jimmer](https://github.com/babyfish-ct/jimmer) (类型安全, 有聚合, 但是api不够友好, 学习成本高, 不可跳表关联, 聚合无法复用)
+5. [jimmer](https://github.com/babyfish-ct/jimmer) (类型安全, 有聚合, 不可跳表关联, 聚合无法复用)
 
 ## TODOList
 1. GraphQL
