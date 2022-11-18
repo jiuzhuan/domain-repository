@@ -77,6 +77,7 @@ public class DomainTemplate<DomEntity> extends LambdaSelectDomBuilder implements
     public Map<Class<?>, List<Object>> execute(Class<DomEntity> domClass) {
 
         // 由于泛型擦除机制 所以只能在执行时传入泛型...  (GenericTypeResolver只能解析派生类的泛型, ((ParameterizedType) class.getGenericSuperclass()).getActualTypeArguments()也是)
+        // 遵循以上原则, 对使用者来说最简单的使用方式是创建继承DomainTemplate的匿名类: new DomainTemplate<xxx>(){}; 此时可以获得泛型.
         this.domClass = domClass;
         this.domainTree = DomainTreeCache.get(domClass);
 
