@@ -116,4 +116,9 @@ class OrderControllerTest {
         List<Order> orders = orderController.addOrder();
     }
 
+    @Test
+    void addSlaveOrder() {
+        // 测试纯新增
+        List<Order> orders = orderController.addSlaveOrder();
+    }
 }
