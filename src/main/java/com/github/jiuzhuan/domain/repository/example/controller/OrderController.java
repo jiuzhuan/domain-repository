@@ -310,26 +310,4 @@ public class OrderController {
         return ac;
     }
 
-    @GetMapping("addSlaveOrder")
-    public List<Order> addSlaveOrder(){
-
-        List<Order> orders = orderSvc.orders();
-        orders.get(0).slaveOrder.add(orderSvc.slaveOrder());
-        orderDomain.save(orders);
-
-        orderDomain.selectAll().from(MasterOrderInfo.class).where().eq(MasterOrderInfo::getUserName, OrderSvc.ADD);
-        orderDomain.execute(Order.class);
-        orderDomain.getEntity(SlaveOrderInfo.class);
-        orderDomain.getEntity(OrderGoodDiscountInfo.class);
-        orderDomain.getEntity(OrderGoodInfo.class);
-        orderDomain.getEntity(OrderAddressInfo.class);
-        orderDomain.getEntity(OrderGoodRemarkInfo.class);
-        orderDomain.getEntity(OrderServiceInfo.class);
-        orderDomain.getEntity(OrderServicePriceInfo.class);
-        List<Order> ac =  orderDomain.getAutoDomains();
-
-        // 验证插入是否正确 (有事务  可重复执行)
-        OrderCompareUtil.equals(orders, ac);
-        return ac;
-    }
 }
