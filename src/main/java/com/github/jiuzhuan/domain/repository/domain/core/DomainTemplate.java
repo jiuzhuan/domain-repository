@@ -28,7 +28,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 /**
  * 聚合仓库
- * 聚合仓库
  * 1. 可以直接使用, 也可以通过DomainRepository代理使用, 以获取作用域的管理
  *
  * @author arrety
