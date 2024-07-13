@@ -92,6 +92,7 @@ public class Degree {
         relationMap.put(2L, new MemberRelationshipEntity(2L, List.of(3L)));
         relationMap.put(3L, new MemberRelationshipEntity(3L, List.of(4L, 5L)));
         relationMap.put(4L, new MemberRelationshipEntity(4L, List.of(13L)));
+        relationMap.put(5L, new MemberRelationshipEntity(5L, List.of(14L)));
         relationMap.put(6L, new MemberRelationshipEntity(6L, List.of(7L, 8L, 9L)));
         relationMap.put(8L, new MemberRelationshipEntity(8L, List.of(11L)));
         relationMap.put(9L, new MemberRelationshipEntity(9L, List.of(10L)));
