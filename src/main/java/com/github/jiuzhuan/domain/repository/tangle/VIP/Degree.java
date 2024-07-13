@@ -90,26 +90,6 @@ public class Degree {
     static {
         relationMap.put(1L, new MemberRelationshipEntity(1L, List.of(2L, 6L)));
         relationMap.put(2L, new MemberRelationshipEntity(2L, List.of(3L)));
-        relationMap.put(3L, new MemberRelationshipEntity(3L, List.of(4L, 5L)));
-        relationMap.put(4L, new MemberRelationshipEntity(4L, List.of(13L)));
-        relationMap.put(5L, new MemberRelationshipEntity(5L, List.of(14L)));
-        relationMap.put(6L, new MemberRelationshipEntity(6L, List.of(7L, 8L, 9L)));
-        relationMap.put(8L, new MemberRelationshipEntity(8L, List.of(11L)));
-        relationMap.put(9L, new MemberRelationshipEntity(9L, List.of(10L)));
-        relationMap.put(11L, new MemberRelationshipEntity(11L, List.of(12L)));
-        relationMap.put(14L, new MemberRelationshipEntity(14L, List.of(15L)));
-        orderAmountMap.put(1L, new BigDecimal(0));
-        orderAmountMap.put(2L, new BigDecimal(0));
-        orderAmountMap.put(3L, new BigDecimal(8888));
-        orderAmountMap.put(4L, new BigDecimal(0));
-        orderAmountMap.put(5L, new BigDecimal(150000));
-        orderAmountMap.put(6L, new BigDecimal(0));
-        orderAmountMap.put(7L, new BigDecimal(0));
-        orderAmountMap.put(8L, new BigDecimal(0));
-        orderAmountMap.put(9L, new BigDecimal(0));
-        orderAmountMap.put(10L, new BigDecimal(150000));
-        orderAmountMap.put(11L, new BigDecimal(100000));
-        orderAmountMap.put(12L, new BigDecimal(50000));
         orderAmountMap.put(13L, new BigDecimal(150000));
         orderAmountMap.put(14L, new BigDecimal(150000));
         orderAmountMap.put(15L, new BigDecimal(150000));
