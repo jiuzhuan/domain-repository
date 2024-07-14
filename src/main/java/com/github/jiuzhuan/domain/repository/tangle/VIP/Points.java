@@ -5,6 +5,7 @@ import java.util.*;
 
 public class Points {
 
+
     /**
      * 计算用户vip积分主方法
      * 积分 = 顺差 + 逆差
@@ -75,6 +76,73 @@ public class Points {
         return relativeRelationSegments;
     }
 
+    /**
+     * 处理片段中的连续递减
+     *
+     * @param leaderDegree             透传
+     * @param directLeaderDegree       判断是否连续递减
+     * @param relativeRelation         要处理的分支
+     * @param relativeRelationSegments 片段头
+     * @return 严格递减的分支列表
+     */
+    private static List<MemberRelationshipDO> relativeAbsSegment(Integer leaderDegree, Integer directLeaderDegree, MemberRelationshipDO relativeRelation, List<MemberRelationshipDO> relativeRelationSegments) {
+
+        List<MemberRelationshipDO> sons = relativeRelation.getSons();
+
+        // 尾节点对积分不产生任何影响，直接丢弃
+        if (sons == null || sons.isEmpty())
+            return null;
+
+        List<MemberRelationshipDO> newSegments = new ArrayList<>();
+        Iterator<MemberRelationshipDO> iterator = sons.iterator();
+        while (iterator.hasNext()) {
+            MemberRelationshipDO next = iterator.next();
+
+            // 严格递减
+            if (relativeRelation.getDegree() > next.getDegree()) {
+                List<MemberRelationshipDO> segments = relativeAbsSegment(leaderDegree, next.getDegree(), next, relativeRelationSegments);
+                Optional.ofNullable(segments).ifPresent(newSegments::addAll);
+            }
+
+            // 逆差出现，剪枝
+            else {
+
+                // 普通逆差 第二次逆差 剪枝
+                List<MemberRelationshipDO> segments = iterateRelativeRelation(leaderDegree, directLeaderDegree, List.of(next), relativeRelationSegments);
+                newSegments.addAll(segments);
+                iterator.remove();
+            }
+        }
+        return newSegments;
+    }
+
+    /**
+     * 第一次迭代，获取顺差下单金额，获取逆差头节点
+     *
+     * @param relativeRelations 所有逆差头节点
+     * @return 顺差下单金额
+     */
+    private static BigDecimal iterateRelation(MemberRelationshipDO leader, List<MemberRelationshipDO> relativeRelations) {
+
+        BigDecimal absOrderAmount = BigDecimal.ZERO;
+        List<MemberRelationshipDO> sons = leader.getSons();
+        if (sons == null || sons.isEmpty()) return absOrderAmount;
+
+        for (MemberRelationshipDO son : sons) {
+
+            // 严格递减
+            if (leader.getDegree() > son.getDegree()) {
+                absOrderAmount = absOrderAmount.add(son.getVisibleOrderAmount());
+                BigDecimal sonAbsOrderAmount = iterateRelation(son, relativeRelations);
+                absOrderAmount = absOrderAmount.add(sonAbsOrderAmount);
+            }
+
+            // 第一次逆差 剪枝
+            else
+                relativeRelations.add(son);
+        }
+        return absOrderAmount;
+    }
 
     public static Map<Integer, Double> degreeRate = new HashMap<>();
 
@@ -86,5 +154,4 @@ public class Points {
         degreeRate.put(4, 0.4);
         degreeRate.put(5, 0.5);
         degreeRate.put(6, 0.6);
-    }
-}
+    }}
